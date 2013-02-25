@@ -5,8 +5,8 @@
         android:title="Share"
         android:actionProviderClass="android.widget.ShareActionProvider" />
     
-    <item android:id="@+id/menu_item_logout"
+    <item android:id="@+id/menu_item_Main"
         android:showAsAction="ifRoom"
-        android:title="Logout" />
+        android:title="Main" />
     
 </menu>

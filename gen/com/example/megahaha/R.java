@@ -240,7 +240,7 @@ containing a value of this type.
         public static final int large=0x7f040002;
         public static final int login_button=0x7f040004;
         public static final int main_ui_container=0x7f040003;
-        public static final int menu_item_logout=0x7f040024;
+        public static final int menu_item_Main=0x7f040024;
         public static final int menu_item_share=0x7f040022;
         public static final int normal=0x7f040001;
         public static final int pickFriendsButton=0x7f040009;
