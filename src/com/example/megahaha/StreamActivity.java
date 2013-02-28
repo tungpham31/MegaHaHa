@@ -14,13 +14,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ShareActionProvider;
 
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
 
 public class StreamActivity extends YouTubeFailureRecoveryActivity implements
-		YouTubePlayer.PlaylistEventListener, YouTubePlayer.PlaybackEventListener {
+		YouTubePlayer.PlaylistEventListener,
+		YouTubePlayer.PlaybackEventListener {
 	private Map<Integer, String> mListOfVideos = new HashMap<Integer, String>();
 	private ShareActionProvider mShareActionProvider;
 	private int mCurrentVideoNumber = 0;
@@ -34,6 +37,20 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
 		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
+
+		final Button like_button = (Button) findViewById(R.id.like_button);
+		like_button.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// Perform action on click
+			}
+		});
+		
+		final Button dislike_button = (Button) findViewById(R.id.dislike_button);
+		dislike_button.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// Perform action on click
+			}
+		});
 
 		// Get all the url of videos in playlist in right order
 		thread1 = new Thread() {
@@ -218,13 +235,13 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	@Override
 	public void onPlaylistEnded() {
 	}
-	
+
 	@Override
-	public void onBuffering(boolean isBuffering){
+	public void onBuffering(boolean isBuffering) {
 	}
-	
+
 	@Override
-	public void onPlaying(){
+	public void onPlaying() {
 		Intent sendIntent = new Intent();
 		sendIntent.setAction(Intent.ACTION_SEND);
 		String videoID = mListOfVideos.get(new Integer(mCurrentVideoNumber));
@@ -233,13 +250,13 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		sendIntent.setType("text/plain");
 		setShareIntent(sendIntent);
 	}
-	
+
 	@Override
-	public void onSeekTo(int newPositionMillis){
+	public void onSeekTo(int newPositionMillis) {
 	}
-	
+
 	@Override
-	public void onStopped(){
+	public void onStopped() {
 	}
 
 	@Override

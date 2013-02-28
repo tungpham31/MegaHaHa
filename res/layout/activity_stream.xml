@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -22,17 +22,26 @@
     <com.google.android.youtube.player.YouTubePlayerView
         android:id="@+id/youtube_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.03" >
+        android:layout_height="match_parent"
+        android:layout_above="@+id/like_button"
+        android:layout_weight="1" >
 
     </com.google.android.youtube.player.YouTubePlayerView>
 
-  <TextView
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="0.01"
-      android:gravity="center"
-      android:text="@string/playerview_text"
-      android:textAppearance="@android:style/TextAppearance.Small" />
+  <Button
+      android:id="@+id/like_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_alignParentLeft="true"
+      android:text="LIKE" />
 
-</LinearLayout>
+  <Button
+      android:id="@+id/dislike_button"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:layout_toRightOf="@+id/like_button"
+      android:text="DISLIKE" />
+
+</RelativeLayout>
