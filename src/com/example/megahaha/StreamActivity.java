@@ -10,6 +10,7 @@ import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -42,6 +43,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		like_button.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				// Perform action on click
+				like_button.setBackgroundColor(Color.RED);
 			}
 		});
 		
@@ -185,9 +187,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
-		case R.id.menu_item_Main:
-			finish();
-			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -219,7 +218,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		System.out.println("StreamActivity: onActivityResult called");
 	}
 
 	@Override
