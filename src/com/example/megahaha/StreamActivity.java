@@ -9,15 +9,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ShareActionProvider;
+import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerView;
@@ -171,7 +170,21 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
+		Context context = getApplicationContext();
+		CharSequence text;
+		Toast toast;
+		int duration = Toast.LENGTH_SHORT;
 		switch (item.getItemId()) {
+		case R.id.menu_like:
+			text = "You like this video";
+			toast = Toast.makeText(context, text, duration);
+			toast.show();
+			return true;
+		case R.id.menu_dislike:
+			text = "You dislike this video";
+			toast = Toast.makeText(context, text, duration);
+			toast.show();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

@@ -8,6 +8,7 @@
     <item android:id="@+id/menu_like"
           android:title="@string/like_button"
           android:showAsAction="ifRoom|withText" />
+    
     <item android:id="@+id/menu_dislike"
           android:title="@string/dislike_button"
           android:showAsAction="ifRoom|withText" />
