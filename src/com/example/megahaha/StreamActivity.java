@@ -39,21 +39,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
 		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
-		final Button like_button = (Button) findViewById(R.id.like_button);
-		like_button.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				// Perform action on click
-				like_button.setBackgroundColor(Color.RED);
-			}
-		});
-		
-		final Button dislike_button = (Button) findViewById(R.id.dislike_button);
-		dislike_button.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				// Perform action on click
-			}
-		});
-
 		// Get all the url of videos in playlist in right order
 		thread1 = new Thread() {
 			public void run() {
