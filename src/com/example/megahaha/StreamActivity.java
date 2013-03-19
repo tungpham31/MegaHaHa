@@ -223,7 +223,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	public void onInitializationSuccess(YouTubePlayer.Provider provider,
 			YouTubePlayer player, boolean wasRestored) {
 		if (!wasRestored) {
-			player.cuePlaylist("PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY");
+			player.loadPlaylist("PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY", 0, 0);
 			player.setPlaylistEventListener(this);
 			player.setPlaybackEventListener(this);
 			player.setPlayerStateChangeListener(this);
