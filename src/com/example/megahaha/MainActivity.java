@@ -14,6 +14,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		/* Does not support this function in this version
 		mPref = getSharedPreferences(PREFS_NAME, 0);
 		mPrefEditor = mPref.edit();
 		mFirstTimeStart = mPref.getBoolean("mFirstTimeStart", true);
@@ -24,10 +25,11 @@ public class MainActivity extends Activity {
 			mFirstTimeStart = false;
 			mPrefEditor.putBoolean("mFirstTimeStart", mFirstTimeStart);
 			mPrefEditor.commit();
-		}
+		}*/
 		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		startStreaming();
 	}
 	
 	public void startStreaming(View view){

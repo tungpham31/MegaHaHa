@@ -33,8 +33,9 @@
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="96dp"
+        android:background="@drawable/wild_oliva"
         android:text="MegaHaHa Customizes Awesomeness To You"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
