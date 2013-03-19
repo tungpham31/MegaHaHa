@@ -6,29 +6,34 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
 import com.google.android.youtube.player.YouTubePlayerView;
 
 public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		YouTubePlayer.PlaylistEventListener,
-		YouTubePlayer.PlaybackEventListener {
+		YouTubePlayer.PlaybackEventListener,
+		YouTubePlayer.PlayerStateChangeListener {
 	private Map<Integer, String> mListOfVideos = new HashMap<Integer, String>();
 	private ShareActionProvider mShareActionProvider;
 	private int mCurrentVideoNumber = 0;
 	private Map<String, String> mLinkFromVideoIDToURL = new HashMap<String, String>();
-	private Thread thread1;
+	private Thread thread1, thread2;
+	private List<String> mListOfVideoTitles = new LinkedList<String>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -64,7 +69,23 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				String cloneData = data;
 
+				// get videos' title
+				while (true) {
+					int top = data.indexOf("<title>");
+					if (top == -1)
+						break;
+					int bot = data.indexOf("</title>");
+					String title = data.substring(top + 7, bot);
+					mListOfVideoTitles.add(title);
+					data = data.substring(bot + 4, data.length());
+				}
+				mListOfVideoTitles.remove(0); // the first title is the title of
+												// the playlist, we don't need
+												// it
+
+				data = cloneData;
 				String targetString = "https://www.youtube.com/v/";
 				int pos;
 				int nVideos = 0;
@@ -80,11 +101,12 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		};
 		thread1.start();
 
-		new Thread() {
+		thread2 = new Thread() {
 			public void run() {
 				TestGoogleDrive();
 			}
-		}.start();
+		};
+		thread2.start();
 	}
 
 	private void TestGoogleDrive() {
@@ -130,7 +152,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			e.printStackTrace();
 		}
 		// handle the rest videoID which does not match to a facebook URL
-		Log.i("values", "" + mListOfVideos.size());
 		for (int i = 0; i <= mListOfVideos.size() - 1; i++) {
 			String videoID = mListOfVideos.get(new Integer(i));
 			if (!mLinkFromVideoIDToURL.containsKey(videoID)) {
@@ -204,6 +225,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			player.cuePlaylist("PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY");
 			player.setPlaylistEventListener(this);
 			player.setPlaybackEventListener(this);
+			player.setPlayerStateChangeListener(this);
 		}
 	}
 
@@ -258,5 +280,49 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	@Override
 	public void onPaused() {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void onAdStarted() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onError(ErrorReason arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onLoaded(String arg0) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onLoading() {
+		// TODO Auto-generated method stub
+		// set title of the video
+		try {
+			thread2.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		TextView videoTitle = (TextView) findViewById(R.id.video_title);
+		videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
+	}
+
+	@Override
+	public void onVideoEnded() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onVideoStarted() {
+		// TODO Auto-generated method stub
+
 	}
 }

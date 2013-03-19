@@ -23,8 +23,22 @@
         android:id="@+id/youtube_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/like_button"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/video_title"
         android:layout_weight="1" >
 
     </com.google.android.youtube.player.YouTubePlayerView>
+
+    <TextView
+        android:id="@+id/video_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="Medium Text"
+        android:textColor="#ffffffff"
+        android:background="#000000"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
 </RelativeLayout>

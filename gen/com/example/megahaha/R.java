@@ -235,7 +235,6 @@ containing a value of this type.
         public static final int com_facebook_usersettingsfragment_logo_image=0x7f040019;
         public static final int com_facebook_usersettingsfragment_profile_name=0x7f04001a;
         public static final int large=0x7f040002;
-        public static final int like_button=0x7f040006;
         public static final int menu_dislike=0x7f04001e;
         public static final int menu_item_share=0x7f04001c;
         public static final int menu_like=0x7f04001d;
@@ -245,6 +244,7 @@ containing a value of this type.
         public static final int small=0x7f040000;
         public static final int start_Streaming=0x7f040003;
         public static final int textView1=0x7f040004;
+        public static final int video_title=0x7f040006;
         public static final int youtube_view=0x7f040005;
     }
     public static final class layout {
