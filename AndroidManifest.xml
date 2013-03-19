@@ -26,7 +26,8 @@
         </activity>
         <activity
             android:name="com.example.megahaha.StreamActivity"
-            android:label="@string/title_activity_stream" >
+            android:label="@string/title_activity_stream" 
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

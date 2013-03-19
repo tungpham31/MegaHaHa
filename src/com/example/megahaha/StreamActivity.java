@@ -14,6 +14,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
@@ -243,6 +244,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	@Override
 	public void onNext() {
 		mCurrentVideoNumber++;
+		Log.i("Loading", "ON NEXT");
 	}
 
 	@Override
@@ -311,7 +313,10 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			e.printStackTrace();
 		}
 		TextView videoTitle = (TextView) findViewById(R.id.video_title);
+		Log.i("Loading", "ON LOADING");
+		videoTitle.setFreezesText(false);
 		videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
+		videoTitle.setFreezesText(true);
 	}
 
 	@Override
