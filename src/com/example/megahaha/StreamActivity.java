@@ -41,6 +41,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stream);
 
+		// initialize youtubeplayerview
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
 		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
