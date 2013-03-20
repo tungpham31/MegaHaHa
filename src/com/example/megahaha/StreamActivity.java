@@ -13,6 +13,7 @@ import java.util.Map;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -29,12 +30,12 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		YouTubePlayer.PlaylistEventListener,
 		YouTubePlayer.PlaybackEventListener,
 		YouTubePlayer.PlayerStateChangeListener {
-	private Map<Integer, String> mListOfVideos = new HashMap<Integer, String>();
+	private Map<Integer, String> mListOfVideoIDs = new HashMap<Integer, String>();
 	private ShareActionProvider mShareActionProvider;
 	private int mCurrentVideoNumber = 0;
 	private Map<String, String> mLinkFromVideoIDToURL = new HashMap<String, String>();
-	private Thread thread1, thread2;
 	private List<String> mListOfVideoTitles = new LinkedList<String>();
+	private int gotBothVideoIDAndLinkUrl = 0;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -45,9 +46,83 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
 		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
-		// Get all the url of videos in playlist in right order
-		thread1 = new Thread() {
-			public void run() {
+		// Get videos' ids and titles
+		getPlaylistInformation();
+
+		// Get url for each videoID
+		getUrlsForVideos();
+	}
+
+	/*
+	 * Open a Google docs containing videoIDs and their respective urls on
+	 * Facebook. Read those url and link them to respective videoID With the
+	 * rest videos which doesn't have Facebook urls, simply link them to their
+	 * respective Youtube url
+	 */
+	private void getUrlsForVideos() {
+		new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				URL fileURL = null;
+				String data = "";
+				try {
+					fileURL = new URL(
+							"https://docs.google.com/document/d/1oj2RZfVzmjMJZ9h_yHictZO9KFbBcfb7y1poFvueFiQ/edit?usp=sharing");
+
+					BufferedReader in = null;
+					in = new BufferedReader(new InputStreamReader(
+							fileURL.openStream()));
+
+					// handling data from the text file
+					String inputLine;
+					while ((inputLine = in.readLine()) != null)
+						data += inputLine;
+
+					in.close();
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				// handle data get from the text file
+				int startPosition = 0;
+				int endPosition = 0;
+				while ((startPosition = data.indexOf("/START/")) != -1) {
+					endPosition = data.indexOf("/END/");
+					String[] values = data.substring(startPosition + 7,
+							endPosition).split(" ");
+					data = data.substring(endPosition + 5);
+					values[1] = refine(values[1]);
+					mLinkFromVideoIDToURL.put(values[0], values[1]);
+				}
+
+				return null;
+			}
+
+			protected void onPostExecute(Void voids) {
+				gotBothVideoIDAndLinkUrl++;
+				if (gotBothVideoIDAndLinkUrl == 2) linkVideoIDToYoutubeUrl();
+				Log.i("Thread", "finish getUrlsForVideos");
+			}
+
+		}.execute();
+	}
+
+	/**
+	 * Open connection to an url containing information about the playlist. Read
+	 * videos' title and put into mListOfVideoTitles. Read videos' id and put
+	 * into mListOfVideoIDs
+	 */
+	private void getPlaylistInformation() {
+		new AsyncTask<Void, Void, String>() {
+
+			@Override
+			protected String doInBackground(Void... params) {
+				// TODO Auto-generated method stub
 				// get data about youtube playlist
 				String data = "";
 				URL youtubePlaylist;
@@ -71,9 +146,57 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				String cloneData = data;
 
-				// get videos' title
+				return data;
+			}
+
+			protected void onPostExecute(String result) {
+				getVideoTitlesFromPlaylistData(result);
+				getVideoIDFromPlaylistData(result);
+				gotBothVideoIDAndLinkUrl++;
+				if (gotBothVideoIDAndLinkUrl == 2) linkVideoIDToYoutubeUrl();
+				Log.i("Thread", "Finish getPlaylistInformation");
+			}
+
+		}.execute();
+	}
+
+	/**
+	 * @param data
+	 * @return
+	 */
+	private void getVideoIDFromPlaylistData(String data) {
+		new AsyncTask<String, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(String... params) {
+				String data = params[0];
+				String targetString = "https://www.youtube.com/v/";
+				int pos;
+				int nVideos = 0;
+				while ((pos = data.indexOf(targetString)) != -1) {
+					data = data.substring(pos + targetString.length());
+					String videoID = data.substring(0, 11);
+					if (!mListOfVideoIDs.containsValue(videoID)) {
+						mListOfVideoIDs.put(new Integer(nVideos), videoID);
+						nVideos++;
+					}
+				}
+				return null;
+			}
+
+		}.execute(data);
+	}
+
+	/**
+	 * @param data
+	 */
+	private void getVideoTitlesFromPlaylistData(String data) {
+		new AsyncTask<String, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(String... params) {
+				String data = params[0];
 				while (true) {
 					int top = data.indexOf("<title>");
 					if (top == -1)
@@ -86,83 +209,25 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 				mListOfVideoTitles.remove(0); // the first title is the title of
 												// the playlist, we don't need
 												// it
-
-				data = cloneData;
-				String targetString = "https://www.youtube.com/v/";
-				int pos;
-				int nVideos = 0;
-				while ((pos = data.indexOf(targetString)) != -1) {
-					data = data.substring(pos + targetString.length());
-					String videoID = data.substring(0, 11);
-					if (!mListOfVideos.containsValue(videoID)) {
-						mListOfVideos.put(new Integer(nVideos), videoID);
-						nVideos++;
-					}
-				}
+				return null;
 			}
-		};
-		thread1.start();
 
-		thread2 = new Thread() {
-			public void run() {
-				TestGoogleDrive();
-			}
-		};
-		thread2.start();
+		}.execute(data);
 	}
 
-	private void TestGoogleDrive() {
-		URL fileURL = null;
-		String data = "";
-		try {
-			fileURL = new URL(
-					"https://docs.google.com/document/d/1oj2RZfVzmjMJZ9h_yHictZO9KFbBcfb7y1poFvueFiQ/edit?usp=sharing");
-
-			BufferedReader in = null;
-			in = new BufferedReader(new InputStreamReader(fileURL.openStream()));
-
-			// handling data from the text file
-			String inputLine;
-			while ((inputLine = in.readLine()) != null)
-				data += inputLine;
-
-			in.close();
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		// handle data get from the text file
-		int startPosition = 0;
-		int endPosition = 0;
-		while ((startPosition = data.indexOf("/START/")) != -1) {
-			endPosition = data.indexOf("/END/");
-			String[] values = data.substring(startPosition + 7, endPosition)
-					.split(" ");
-			data = data.substring(endPosition + 5);
-			values[1] = refine(values[1]);
-			mLinkFromVideoIDToURL.put(values[0], values[1]);
-		}
-
-		try {
-			thread1.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// handle the rest videoID which does not match to a facebook URL
-		for (int i = 0; i <= mListOfVideos.size() - 1; i++) {
-			String videoID = mListOfVideos.get(new Integer(i));
+	/**
+	 * 
+	 */
+	private void linkVideoIDToYoutubeUrl() {
+		// handle the rest videoID which does not match to a facebook
+		// URL
+		for (int i = 0; i <= mListOfVideoIDs.size() - 1; i++) {
+			String videoID = mListOfVideoIDs.get(new Integer(i));
 			if (!mLinkFromVideoIDToURL.containsKey(videoID)) {
 				String youtubeURL = "http://www.youtube.com/watch?v=" + videoID;
 				mLinkFromVideoIDToURL.put(videoID, youtubeURL);
 			}
 		}
-
-		// Log.i("Data", data);
 	}
 
 	// refine String get from an URL
@@ -245,7 +310,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	@Override
 	public void onNext() {
 		mCurrentVideoNumber++;
-		Log.i("Loading", "ON NEXT");
 	}
 
 	@Override
@@ -265,7 +329,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	public void onPlaying() {
 		Intent sendIntent = new Intent();
 		sendIntent.setAction(Intent.ACTION_SEND);
-		String videoID = mListOfVideos.get(new Integer(mCurrentVideoNumber));
+		String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
 		String videoURL = mLinkFromVideoIDToURL.get(videoID);
 		sendIntent.putExtra(Intent.EXTRA_TEXT, videoURL);
 		sendIntent.setType("text/plain");
@@ -305,19 +369,11 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 	@Override
 	public void onLoading() {
-		// TODO Auto-generated method stub
 		// set title of the video
-		try {
-			thread2.join();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (mCurrentVideoNumber < mListOfVideoTitles.size()) {
+			TextView videoTitle = (TextView) findViewById(R.id.video_title);
+			videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
 		}
-		TextView videoTitle = (TextView) findViewById(R.id.video_title);
-		Log.i("Loading", "ON LOADING");
-		videoTitle.setFreezesText(false);
-		videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
-		videoTitle.setFreezesText(true);
 	}
 
 	@Override
