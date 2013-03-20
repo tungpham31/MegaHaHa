@@ -13,6 +13,7 @@ import java.util.Map;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,9 +34,13 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	private Map<Integer, String> mListOfVideoIDs = new HashMap<Integer, String>();
 	private ShareActionProvider mShareActionProvider;
 	private int mCurrentVideoNumber = 0;
+	private int mCurrentTimeInVideo = 0;
 	private Map<String, String> mLinkFromVideoIDToURL = new HashMap<String, String>();
 	private List<String> mListOfVideoTitles = new LinkedList<String>();
 	private int gotBothVideoIDAndLinkUrl = 0;
+	private SharedPreferences mPref;
+	private SharedPreferences.Editor mPrefEditor;
+	private YouTubePlayer youtubePlayer;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -45,6 +50,14 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		// initialize youtubeplayerview
 		YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
 		youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
+
+		// get Shared Preference
+		mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+		mPrefEditor = mPref.edit();
+
+		// get current video and current time playing from Shared Preference
+		mCurrentVideoNumber = mPref.getInt("mCurrentVideoNumber", 0);
+		mCurrentTimeInVideo = mPref.getInt("mCurrentTimeInVideo", 0);
 
 		// Get videos' ids and titles
 		getPlaylistInformation();
@@ -105,7 +118,8 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 			protected void onPostExecute(Void voids) {
 				gotBothVideoIDAndLinkUrl++;
-				if (gotBothVideoIDAndLinkUrl == 2) linkVideoIDToYoutubeUrl();
+				if (gotBothVideoIDAndLinkUrl == 2)
+					linkVideoIDToYoutubeUrl();
 				Log.i("Thread", "finish getUrlsForVideos");
 			}
 
@@ -154,7 +168,8 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 				getVideoTitlesFromPlaylistData(result);
 				getVideoIDFromPlaylistData(result);
 				gotBothVideoIDAndLinkUrl++;
-				if (gotBothVideoIDAndLinkUrl == 2) linkVideoIDToYoutubeUrl();
+				if (gotBothVideoIDAndLinkUrl == 2)
+					linkVideoIDToYoutubeUrl();
 				Log.i("Thread", "Finish getPlaylistInformation");
 			}
 
@@ -289,10 +304,12 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	public void onInitializationSuccess(YouTubePlayer.Provider provider,
 			YouTubePlayer player, boolean wasRestored) {
 		if (!wasRestored) {
-			player.loadPlaylist("PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY", 0, 0);
-			player.setPlaylistEventListener(this);
-			player.setPlaybackEventListener(this);
-			player.setPlayerStateChangeListener(this);
+			youtubePlayer = player;
+			youtubePlayer.loadPlaylist("PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY",
+					mCurrentVideoNumber, mCurrentTimeInVideo);
+			youtubePlayer.setPlaylistEventListener(this);
+			youtubePlayer.setPlaybackEventListener(this);
+			youtubePlayer.setPlayerStateChangeListener(this);
 		}
 	}
 
@@ -315,6 +332,18 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	@Override
 	public void onPrevious() {
 		mCurrentVideoNumber--;
+	}
+
+	@Override
+	/*
+	 * on activity paused
+	 */
+	protected void onPause() {
+		System.out.println(youtubePlayer.getCurrentTimeMillis());
+		mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
+		mPrefEditor.putInt("mCurrentTimeInVideo", youtubePlayer.getCurrentTimeMillis());
+		mPrefEditor.commit();
+		super.onPause();
 	}
 
 	@Override

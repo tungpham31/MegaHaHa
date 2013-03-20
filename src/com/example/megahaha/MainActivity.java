@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.View;
 
 public class MainActivity extends Activity {
-	public static final String PREFS_NAME = "MyPrefsFile";
 	private SharedPreferences mPref;
 	private SharedPreferences.Editor mPrefEditor;
 	private boolean mFirstTimeStart;

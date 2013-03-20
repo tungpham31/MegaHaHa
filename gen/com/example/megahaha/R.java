@@ -272,6 +272,7 @@ containing a value of this type.
         public static final int stream=0x7f090001;
     }
     public static final class string {
+        public static final int PREFS_NAME=0x7f050032;
         public static final int action_settings=0x7f050020;
         public static final int app_ID=0x7f05001e;
         public static final int app_name=0x7f050019;

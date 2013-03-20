@@ -24,7 +24,8 @@
     <string name="no_friends_selected">&lt;No friends selected&gt;</string>
     <string name="no_place_selected">&lt;No place selected&gt;</string>
     <string name="pick_seattle_place">Pick a Seattle Place</string>
-    <string name="like_button"> Like</string>
-    <string name="dislike_button"> Dislike</string>
+    <string name="like_button">Like</string>
+    <string name="dislike_button">Dislike</string>
+    <string name="PREFS_NAME">MyPrefsFile</string>
 
 </resources>
