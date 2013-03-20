@@ -356,13 +356,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 	@Override
 	public void onPlaying() {
-		Intent sendIntent = new Intent();
-		sendIntent.setAction(Intent.ACTION_SEND);
-		String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
-		String videoURL = mLinkFromVideoIDToURL.get(videoID);
-		sendIntent.putExtra(Intent.EXTRA_TEXT, videoURL);
-		sendIntent.setType("text/plain");
-		setShareIntent(sendIntent);
 	}
 
 	@Override
@@ -403,6 +396,15 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			TextView videoTitle = (TextView) findViewById(R.id.video_title);
 			videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
 		}
+		
+		// update the link to share for this currently playing video
+		Intent sendIntent = new Intent();
+		sendIntent.setAction(Intent.ACTION_SEND);
+		String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
+		String videoURL = mLinkFromVideoIDToURL.get(videoID);
+		sendIntent.putExtra(Intent.EXTRA_TEXT, videoURL);
+		sendIntent.setType("text/plain");
+		setShareIntent(sendIntent);
 	}
 
 	@Override
