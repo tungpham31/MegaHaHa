@@ -231,6 +231,16 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 				return null;
 			}
 
+			protected void onPostExecute(Void myVoid) {
+				// set title of the currently playing video right after the mListOfVideoTitles is
+				// completely built
+				if (mCurrentVideoNumber < mListOfVideoTitles.size()) {
+					TextView videoTitle = (TextView) findViewById(R.id.video_title);
+					videoTitle.setText(mListOfVideoTitles
+							.get(mCurrentVideoNumber));
+				}
+			}
+
 		}.execute(data);
 	}
 
