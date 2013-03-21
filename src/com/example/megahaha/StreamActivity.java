@@ -27,6 +27,7 @@ import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
 import com.google.android.youtube.player.YouTubePlayerView;
 
+@SuppressLint("NewApi")
 public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		YouTubePlayer.PlaylistEventListener,
 		YouTubePlayer.PlaybackEventListener,
@@ -261,11 +262,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 		// Fetch and store ShareActionProvider
 		mShareActionProvider = (ShareActionProvider) item.getActionProvider();
-		Intent sendIntent = new Intent();
-		sendIntent.setAction(Intent.ACTION_SEND);
-		sendIntent.putExtra(Intent.EXTRA_TEXT, "");
-		sendIntent.setType("text/plain");
-		setShareIntent(sendIntent);
+		updateShareActionProvider(null);
 
 		return true;
 	}
@@ -294,7 +291,11 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	}
 
 	// Call to update the share intent
-	private void setShareIntent(Intent shareIntent) {
+	private void updateShareActionProvider(String link) {
+		Intent shareIntent = new Intent();
+		shareIntent.setAction(Intent.ACTION_SEND);
+		shareIntent.putExtra(Intent.EXTRA_TEXT, link);
+		shareIntent.setType("text/plain");
 		if (mShareActionProvider != null) {
 			mShareActionProvider.setShareIntent(shareIntent);
 		}
@@ -402,9 +403,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		sendIntent.setAction(Intent.ACTION_SEND);
 		String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
 		String videoURL = mLinkFromVideoIDToURL.get(videoID);
-		sendIntent.putExtra(Intent.EXTRA_TEXT, videoURL);
-		sendIntent.setType("text/plain");
-		setShareIntent(sendIntent);
+		updateShareActionProvider(videoURL);
 	}
 
 	@Override
