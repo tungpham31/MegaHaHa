@@ -436,7 +436,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
     @Override
     public void onError(ErrorReason error) {
-        // Do nothing.
+        if (ErrorReason.UNEXPECTED_SERVICE_DISCONNECTION.equals(error)) {
+            mYouTubePlayer = null;
+        }
     }
 
     @Override
