@@ -379,10 +379,11 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	}
 
 	/**
+	 * Update the newest link for the currently playing video
 	 * @param link
 	 *            : the url of the currently playing video. This url needs to be
-	 *            update so that users can share it if they want to. Update the
-	 *            newest link for the currently playing video
+	 *            update so that users can share it if they want to. 
+	 * 
 	 */
 	private void updateShareActionProvider(String link) {
 		Intent shareIntent = new Intent();
@@ -415,31 +416,51 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-	}
-
-	@Override
+	/**
+	 * when playing next video on playlist
+	 */
 	public void onNext() {
 		mCurrentVideoNumber++;
 	}
 
+	/**
+	 * when playing previous video on playlist
+	 */
 	@Override
 	public void onPrevious() {
 		mCurrentVideoNumber--;
 	}
 
 	@Override
-	/*
+	/**
 	 * on activity paused
 	 */
 	protected void onPause() {
-		System.out.println(youtubePlayer.getCurrentTimeMillis());
+		// save position of current video and current time in it
 		mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
 		mPrefEditor.putInt("mCurrentTimeInVideo",
 				youtubePlayer.getCurrentTimeMillis());
 		mPrefEditor.commit();
 		super.onPause();
+	}
+
+	/**
+	 * when video is on loading
+	 */
+	@Override
+	public void onLoading() {
+		// set title of the video
+		if (mCurrentVideoNumber < mListOfVideoTitles.size()) {
+			TextView videoTitle = (TextView) findViewById(R.id.video_title);
+			videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
+		}
+
+		// update the link to share for this currently playing video
+		Intent sendIntent = new Intent();
+		sendIntent.setAction(Intent.ACTION_SEND);
+		String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
+		String videoURL = mLinkFromVideoIDToURL.get(videoID);
+		updateShareActionProvider(videoURL);
 	}
 
 	@Override
@@ -483,22 +504,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	public void onLoaded(String arg0) {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public void onLoading() {
-		// set title of the video
-		if (mCurrentVideoNumber < mListOfVideoTitles.size()) {
-			TextView videoTitle = (TextView) findViewById(R.id.video_title);
-			videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
-		}
-
-		// update the link to share for this currently playing video
-		Intent sendIntent = new Intent();
-		sendIntent.setAction(Intent.ACTION_SEND);
-		String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
-		String videoURL = mLinkFromVideoIDToURL.get(videoID);
-		updateShareActionProvider(videoURL);
 	}
 
 	@Override
