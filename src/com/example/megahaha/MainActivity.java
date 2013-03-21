@@ -98,7 +98,7 @@ public class MainActivity extends YouTubeFailureRecoveryActivity implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main);
 
         // initialize youtubeplayerview
         YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
