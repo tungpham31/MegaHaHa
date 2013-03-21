@@ -436,12 +436,15 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	 * on activity paused
 	 */
 	protected void onPause() {
+		super.onPause();
+		
+		// Necessary to clear first if we save preferences onPause. 
+        mPrefEditor.clear();
 		// save position of current video and current time in it
 		mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
 		mPrefEditor.putInt("mCurrentTimeInVideo",
 				youtubePlayer.getCurrentTimeMillis());
 		mPrefEditor.commit();
-		super.onPause();
 	}
 
 	/**
