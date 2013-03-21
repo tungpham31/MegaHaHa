@@ -1,12 +1,10 @@
 package com.example.megahaha;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
@@ -15,6 +13,10 @@ import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
+import com.google.android.youtube.player.YouTubePlayer.PlaybackEventListener;
+import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
+import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
+import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerView;
 
 import java.io.BufferedReader;
@@ -27,14 +29,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/*
- * Handling the Streaming Activity.
+/**
+ * The main activity
  */
-public class MainActivity extends YouTubeFailureRecoveryActivity implements
-        YouTubePlayer.PlaylistEventListener, YouTubePlayer.PlaybackEventListener,
-        YouTubePlayer.PlayerStateChangeListener {
-
-    public static final String YOUTUBE_PLAYLIST_ID = "PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY";
+public final class MainActivity extends YouTubeFailureRecoveryActivity implements
+        PlaylistEventListener, PlaybackEventListener, PlayerStateChangeListener {
+    private static final String YOUTUBE_PLAYLIST_ID = "PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY";
 
     private static final String URL_TO_GET_PLAYLIST_INFORMATION =
             "https://gdata.youtube.com/feeds/api/playlists/PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY?v=2";
@@ -44,31 +44,31 @@ public class MainActivity extends YouTubeFailureRecoveryActivity implements
 
     /**
      * Keep a list of video ids in the same order as in the playlist. This list is for later
-     * reference because youtube player does not support method to get what video is currently
+     * reference because YouTube player does not support method to get what video is currently
      * played.
      */
     private Map<Integer, String> mListOfVideoIDs = new HashMap<Integer, String>();
 
     /**
      * ShareActionProvider is used to support users to share link of the videos in playlist. Links
-     * can be facebook urls or youtube urls depending on whether that particular video has facebook
-     * url or not
+     * can be Facebook urls or YouTube urls depending on whether that particular video has Facebook
+     * url or not.
      */
     private ShareActionProvider mShareActionProvider;
 
     /**
-     * keep track of position of the current video playing
+     * Keep track of position of the current video playing.
      */
     private int mCurrentVideoNumber = 0;
 
     /**
-     * keep track of current time in playing video. Let user start video where they left off
-     * previous time
+     * Keep track of current time in playing video. Let user start video where they left off
+     * previous time.
      */
     private int mCurrentTimeInVideo = 0;
 
     /**
-     * a map from a videoID to its corresponding url (either facebook url or youtube url)
+     * A map from a video id to its corresponding URL (either Facebook URL or YouTube URL).
      */
     private Map<String, String> mLinkFromVideoIDToURL = new HashMap<String, String>();
 
@@ -90,9 +90,9 @@ public class MainActivity extends YouTubeFailureRecoveryActivity implements
     private SharedPreferences.Editor mPrefEditor;
 
     /**
-     * youtube player
+     * YouTube player.
      */
-    private YouTubePlayer youtubePlayer;
+    private YouTubePlayer mYouTubePlayer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,15 +100,15 @@ public class MainActivity extends YouTubeFailureRecoveryActivity implements
 
         setContentView(R.layout.main);
 
-        // initialize youtubeplayerview
-        YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
+        // Initialize YouTubePlayerView.
+        final YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
         youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
-        // get Shared Preference
+        // Get Shared Preference.
         mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         mPrefEditor = mPref.edit();
 
-        // get current video and current time playing from Shared Preference
+        // Get current video and current time playing from Shared Preference.
         mCurrentVideoNumber = mPref.getInt("mCurrentVideoNumber", 0);
         mCurrentTimeInVideo = mPref.getInt("mCurrentTimeInVideo", 0);
 
@@ -193,7 +193,6 @@ public class MainActivity extends YouTubeFailureRecoveryActivity implements
      */
     private void getPlaylistInformation() {
         new AsyncTask<Void, Void, String>() {
-
             @Override
             protected String doInBackground(Void... params) {
                 // read data from youtube playlist
@@ -332,7 +331,6 @@ public class MainActivity extends YouTubeFailureRecoveryActivity implements
         updateShareActionProvider(videoURL);
     }
 
-    @SuppressLint("NewApi")
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -388,17 +386,17 @@ public class MainActivity extends YouTubeFailureRecoveryActivity implements
     }
 
     @Override
-    public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer player,
-            boolean wasRestored) {
+    public void
+            onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
         if (!wasRestored) {
-            // if successfully initialize youtube player, start setting it up
-            // with playlist and listeners
-            youtubePlayer = player;
-            youtubePlayer.loadPlaylist(YOUTUBE_PLAYLIST_ID, mCurrentVideoNumber,
+            // If successfully initialize YouTube player, start setting it up
+            // with playlist and listeners.
+            mYouTubePlayer = player;
+            mYouTubePlayer.loadPlaylist(YOUTUBE_PLAYLIST_ID, mCurrentVideoNumber,
                     mCurrentTimeInVideo);
-            youtubePlayer.setPlaylistEventListener(this);
-            youtubePlayer.setPlaybackEventListener(this);
-            youtubePlayer.setPlayerStateChangeListener(this);
+            mYouTubePlayer.setPlaylistEventListener(this);
+            mYouTubePlayer.setPlaybackEventListener(this);
+            mYouTubePlayer.setPlayerStateChangeListener(this);
         }
     }
 
@@ -424,92 +422,85 @@ public class MainActivity extends YouTubeFailureRecoveryActivity implements
     }
 
     @Override
-    /**
-     * on activity paused
-     */
     public void onPause() {
-        Log.i("Pause", "On Pause");
         super.onPause();
 
         // Necessary to clear first if we save preferences onPause.
         mPrefEditor.clear();
         // save position of current video and current time in it
         mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
-        mPrefEditor.putInt("mCurrentTimeInVideo", youtubePlayer.getCurrentTimeMillis());
+        if (mYouTubePlayer != null) {
+            mPrefEditor.putInt("mCurrentTimeInVideo", mYouTubePlayer.getCurrentTimeMillis());
+        }
         mPrefEditor.commit();
     }
 
-    /**
-     * when video is on loading
-     */
     @Override
     public void onLoading() {
-        // set title of the video
+        // Set title of the video.
         if (mCurrentVideoNumber < mListOfVideoTitles.size()) {
             TextView videoTitle = (TextView) findViewById(R.id.video_title);
             videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
         }
 
-        // update the link to share for this currently playing video
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
-        String videoURL = mLinkFromVideoIDToURL.get(videoID);
+        // Update the link to share for this currently playing video.
+        final String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
+        final String videoURL = mLinkFromVideoIDToURL.get(videoID);
         updateShareActionProvider(videoURL);
     }
 
     @Override
     public void onPlaylistEnded() {
+        // Do nothing.
     }
 
     @Override
     public void onBuffering(boolean isBuffering) {
+        // Do nothing.
     }
 
     @Override
     public void onPlaying() {
+        // Do nothing.
     }
 
     @Override
     public void onSeekTo(int newPositionMillis) {
+        // Do nothing.
     }
 
     @Override
     public void onStopped() {
+        // Do nothing.
     }
 
     @Override
     public void onPaused() {
-        // TODO Auto-generated method stub
+        // Do nothing.
     }
 
     @Override
     public void onAdStarted() {
-        // TODO Auto-generated method stub
-
+        // Do nothing.
     }
 
     @Override
-    public void onError(ErrorReason arg0) {
-        // TODO Auto-generated method stub
-
+    public void onError(ErrorReason error) {
+        // Do nothing.
     }
 
     @Override
     public void onLoaded(String arg0) {
-        // TODO Auto-generated method stub
-
+        // Do nothing.
     }
 
     @Override
     public void onVideoEnded() {
-        // TODO Auto-generated method stub
-
+        // Do nothing.
     }
 
     @Override
     public void onVideoStarted() {
-        // TODO Auto-generated method stub
-
+        // Do nothing.
     }
 }
