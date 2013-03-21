@@ -1,6 +1,5 @@
 package com.example.megahaha;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -135,6 +134,17 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         mPrefEditor.commit();
     }
 
+    @Override
+    public void onDestroy() {
+        if (mYouTubePlayer != null) {
+            mYouTubePlayer.setPlaylistEventListener(this);
+            mYouTubePlayer.setPlayerStateChangeListener(this);
+            mYouTubePlayer = null;
+        }
+
+        super.onDestroy();
+    }
+
     /**
      * Opens connection to an URL containing information about the playlist. Read video titles and
      * put into mVideoTitles. Read videos' id and put into mVideoIds
@@ -178,7 +188,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                 // With the data read from YouTube playlist, call two methods to extract video
                 // titles and video ids from that data.
                 getVideoTitlesFromPlaylistData(result);
-                getVideoIDFromPlaylistData(result);
+                getVideoIdsFromPlaylistData(result);
 
                 // Increase mGotBothVideoIdsAndLinkUrls, indicating that one of the two threads
                 // is done.
@@ -191,24 +201,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                 }
             }
         }.execute();
-    }
-
-    /**
-     * Extracts video ids from data and put them in order into mVideoIds.
-     * @param data
-     *            : YouTube playlist's information
-     */
-    private void getVideoIDFromPlaylistData(String data) {
-        final String targetString = "https://www.youtube.com/v/";
-        int pos;
-
-        while ((pos = data.indexOf(targetString)) != -1) {
-            data = data.substring(pos + targetString.length());
-            final String videoId = data.substring(0, 11);
-            if (!mVideoIds.contains(videoId)) {
-                mVideoIds.add(videoId);
-            }
-        }
     }
 
     /**
@@ -232,6 +224,24 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         if (mCurrentVideoNumber < mVideoTitles.size()) {
             final TextView videoTitle = (TextView) findViewById(R.id.video_title);
             videoTitle.setText(mVideoTitles.get(mCurrentVideoNumber));
+        }
+    }
+
+    /**
+     * Extracts video ids from data and put them in order into mVideoIds.
+     * @param data
+     *            : YouTube playlist's information
+     */
+    private void getVideoIdsFromPlaylistData(String data) {
+        final String targetString = "https://www.youtube.com/v/";
+        int pos;
+
+        while ((pos = data.indexOf(targetString)) != -1) {
+            data = data.substring(pos + targetString.length());
+            final String videoId = data.substring(0, 11);
+            if (!mVideoIds.contains(videoId)) {
+                mVideoIds.add(videoId);
+            }
         }
     }
 
@@ -328,7 +338,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         updateShareActionProvider(mUrlMap.get(videoId));
     }
 
-    @SuppressLint("NewApi")
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -409,15 +418,14 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     public void onLoading() {
         // Set title of the video.
         if (mCurrentVideoNumber < mVideoTitles.size()) {
-            TextView videoTitle = (TextView) findViewById(R.id.video_title);
+            final TextView videoTitle = (TextView) findViewById(R.id.video_title);
             videoTitle.setText(mVideoTitles.get(mCurrentVideoNumber));
         }
 
         // Update the link to share for this currently playing video.
         if (mCurrentVideoNumber < mVideoIds.size()) {
-            final String videoID = mVideoIds.get(mCurrentVideoNumber);
-            final String videoURL = mUrlMap.get(videoID);
-            updateShareActionProvider(videoURL);
+            final String videoId = mVideoIds.get(mCurrentVideoNumber);
+            updateShareActionProvider(mUrlMap.get(videoId));
         }
     }
 
