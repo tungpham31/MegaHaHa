@@ -1,14 +1,18 @@
 package com.example.megahaha;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ShareCompat;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -92,19 +96,21 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     /**
      * YouTube player.
      */
+    private YouTubePlayerView mYouTubeView;
     private YouTubePlayer mYouTubePlayer;
 
     @Override
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main);
 
-        // Initialize YouTubePlayerView.
-        final YouTubePlayerView youTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
-        youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
+        // Initialize {@link YouTubePlayerView}.
+        mYouTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
+        mYouTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
-        // Get Shared Preference.
+        // Get {@link SharedPreferences}.
         final SharedPreferences prefs = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         mPrefEditor = prefs.edit();
 
@@ -119,12 +125,13 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         getUrlsForVideos();
     }
 
+    private boolean isLandscape() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
     @Override
     public void onPause() {
         super.onPause();
-
-        // Necessary to clear first if we save preferences onPause.
-        mPrefEditor.clear();
 
         // Save position of current video and current time in it.
         mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
@@ -219,12 +226,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
             data = data.substring(bot + 4, data.length());
         }
 
-        mVideoTitles.remove(0); // the first title is the title of the playlist, we don't need it
-
-        if (mCurrentVideoNumber < mVideoTitles.size()) {
-            final TextView videoTitle = (TextView) findViewById(R.id.video_title);
-            videoTitle.setText(mVideoTitles.get(mCurrentVideoNumber));
-        }
+        mVideoTitles.remove(0); // the first title is the title of the playlist, we don't need it.
+        updateTitle();
     }
 
     /**
@@ -367,6 +370,22 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     }
 
     /**
+     * Update the title of the video.
+     */
+    private void updateTitle() {
+        // Set title of the video.
+        if (mCurrentVideoNumber < mVideoTitles.size()) {
+            final TextView videoTitle = (TextView) findViewById(R.id.video_title);
+            if (isLandscape()) {
+                videoTitle.setVisibility(View.GONE);
+                setTitle(mVideoTitles.get(mCurrentVideoNumber));
+            } else {
+                videoTitle.setText(mVideoTitles.get(mCurrentVideoNumber));
+            }
+        }
+    }
+
+    /**
      * Update the newest link for the currently playing video
      * @param link
      *            : the url of the currently playing video. This url needs to be update so that
@@ -416,11 +435,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
     @Override
     public void onLoading() {
-        // Set title of the video.
-        if (mCurrentVideoNumber < mVideoTitles.size()) {
-            final TextView videoTitle = (TextView) findViewById(R.id.video_title);
-            videoTitle.setText(mVideoTitles.get(mCurrentVideoNumber));
-        }
+        updateTitle();
 
         // Update the link to share for this currently playing video.
         if (mCurrentVideoNumber < mVideoIds.size()) {
@@ -442,8 +457,12 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     }
 
     @Override
-    public void onLoaded(String arg0) {
-        // Do nothing.
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    public void onLoaded(String videoId) {
+        // Enter low profile mode.
+        if (isLandscape() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            mYouTubeView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        }
     }
 
     @Override
