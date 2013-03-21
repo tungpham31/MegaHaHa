@@ -140,7 +140,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         super.onDestroy();
 
         if (mYouTubePlayer != null) {
-            mYouTubePlayer.release();
             mYouTubePlayer = null;
         }
     }
