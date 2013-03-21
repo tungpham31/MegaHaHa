@@ -1,5 +1,6 @@
 package com.example.megahaha;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -32,6 +33,7 @@ import java.util.Map;
 /**
  * The main activity.
  */
+@SuppressLint("NewApi")
 public final class MainActivity extends YouTubeFailureRecoveryActivity implements
         PlaylistEventListener, PlaybackEventListener, PlayerStateChangeListener {
     private static final String YOUTUBE_PLAYLIST_ID = "PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY";
@@ -375,7 +377,8 @@ public final class MainActivity extends YouTubeFailureRecoveryActivity implement
      *            : the url of the currently playing video. This url needs to be update so that
      *            users can share it if they want to.
      */
-    private void updateShareActionProvider(String link) {
+    @SuppressLint("NewApi")
+	private void updateShareActionProvider(String link) {
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
         shareIntent.putExtra(Intent.EXTRA_TEXT, link);
