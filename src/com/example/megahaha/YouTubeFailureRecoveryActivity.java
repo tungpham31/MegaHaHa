@@ -2,8 +2,8 @@ package com.example.megahaha;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
-import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.OnInitializedListener;
+import com.google.android.youtube.player.YouTubePlayer.Provider;
 
 /**
  * An abstract activity which deals with recovering from errors which may occur during API
@@ -14,12 +14,11 @@ public abstract class YouTubeFailureRecoveryActivity extends YouTubeBaseActivity
     private static final int RECOVERY_DIALOG_REQUEST = 1;
 
     @Override
-    public void onInitializationFailure(YouTubePlayer.Provider provider,
-            YouTubeInitializationResult errorReason) {
+    public void onInitializationFailure(Provider provider, YouTubeInitializationResult errorReason) {
         if (errorReason.isUserRecoverableError()) {
             errorReason.getErrorDialog(this, RECOVERY_DIALOG_REQUEST).show();
         } else {
-            String errorMessage =
+            final String errorMessage =
                     String.format(getString(R.string.error_player), errorReason.toString());
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
@@ -33,6 +32,5 @@ public abstract class YouTubeFailureRecoveryActivity extends YouTubeBaseActivity
         }
     }
 
-    protected abstract YouTubePlayer.Provider getYouTubePlayerProvider();
-
+    protected abstract Provider getYouTubePlayerProvider();
 }

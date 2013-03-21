@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The main activity
+ * The main activity.
  */
 public final class MainActivity extends YouTubeFailureRecoveryActivity implements
         PlaylistEventListener, PlaybackEventListener, PlayerStateChangeListener {
