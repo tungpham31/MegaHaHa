@@ -19,24 +19,26 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <Button
-        android:id="@+id/start_Streaming"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="70dp"
-        android:text="Stop Lecturing And Start Streaming Now!!!"
-        android:onClick="startStreaming" />
+    <com.google.android.youtube.player.YouTubePlayerView
+        android:id="@+id/youtube_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/video_title"
+        android:layout_weight="1" >
+
+    </com.google.android.youtube.player.YouTubePlayerView>
 
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/video_title"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_height="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:background="@drawable/wild_oliva"
-        android:text="MegaHaHa Customizes Awesomeness To You"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:background="#000000"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#ffffffff" />
 
 </RelativeLayout>
