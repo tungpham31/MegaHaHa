@@ -1,7 +1,6 @@
 package com.example.megahaha;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +12,7 @@ import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
@@ -37,7 +37,7 @@ import java.util.Map;
  * The main activity.
  */
 @SuppressLint("NewApi")
-public final class MainActivity extends Activity implements OnInitializedListener,
+public final class MainActivity extends YouTubeBaseActivity implements OnInitializedListener,
         PlaylistEventListener, PlaybackEventListener, PlayerStateChangeListener {
     private static final String YOUTUBE_PLAYLIST_ID = "PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY";
 
