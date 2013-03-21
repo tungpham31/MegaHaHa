@@ -380,9 +380,10 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 	/**
 	 * Update the newest link for the currently playing video
+	 * 
 	 * @param link
 	 *            : the url of the currently playing video. This url needs to be
-	 *            update so that users can share it if they want to. 
+	 *            update so that users can share it if they want to.
 	 * 
 	 */
 	private void updateShareActionProvider(String link) {
@@ -435,11 +436,12 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	/**
 	 * on activity paused
 	 */
-	protected void onPause() {
+	public void onPause() {
+		Log.i("Pause", "On Pause");
 		super.onPause();
-		
-		// Necessary to clear first if we save preferences onPause. 
-        mPrefEditor.clear();
+
+		// Necessary to clear first if we save preferences onPause.
+		mPrefEditor.clear();
 		// save position of current video and current time in it
 		mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
 		mPrefEditor.putInt("mCurrentTimeInVideo",
