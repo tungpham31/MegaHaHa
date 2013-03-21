@@ -135,15 +135,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         mPrefEditor.commit();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        if (mYouTubePlayer != null) {
-            mYouTubePlayer = null;
-        }
-    }
-
     /**
      * Opens connection to an URL containing information about the playlist. Read video titles and
      * put into mVideoTitles. Read videos' id and put into mVideoIds
