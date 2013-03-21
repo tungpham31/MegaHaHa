@@ -6,10 +6,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ShareCompat;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,11 +81,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private int mCurrentTimeInVideo = 0;
 
     /**
-     * {@link ShareActionProvider} is used to support users to share link of the videos in playlist.
-     * Links can be Facebook URLs or YouTube URLs depending on whether that particular video has
-     * Facebook URL or not.
+     * The share menu item.
      */
-    private ShareActionProvider mShareActionProvider;
+    private MenuItem mShareMenuItem;
 
     /**
      * Shared Preferences to save variables.
@@ -347,11 +345,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         getMenuInflater().inflate(R.menu.main, menu);
 
         // Locate MenuItem with ShareActionProvider.
-        final MenuItem item = menu.findItem(R.id.menu_item_share);
-
-        // Fetch and store ShareActionProvider.
-        mShareActionProvider = (ShareActionProvider) item.getActionProvider();
-        updateShareActionProvider(null);
+        mShareMenuItem = menu.findItem(R.id.menu_item_share);
 
         return true;
     }
@@ -379,13 +373,15 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
      *            : the url of the currently playing video. This url needs to be update so that
      *            users can share it if they want to.
      */
-    @SuppressLint("NewApi")
     private void updateShareActionProvider(String link) {
         final Intent intent = new Intent(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, link);
         intent.setType("text/plain");
-        if (mShareActionProvider != null) {
-            mShareActionProvider.setShareIntent(intent);
+        if (mShareMenuItem != null) {
+            ShareCompat.configureMenuItem(
+                    mShareMenuItem,
+                    ShareCompat.IntentBuilder.from(MainActivity.this).setText(link)
+                            .setType("text/plain"));
         }
     }
 
