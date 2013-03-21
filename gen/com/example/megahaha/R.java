@@ -303,11 +303,13 @@ containing a value of this type.
         public static final int com_facebook_usersettingsfragment_logged_in=0x7f050009;
         public static final int com_facebook_usersettingsfragment_not_logged_in=0x7f05000a;
         public static final int dislike_button=0x7f050031;
+        public static final int dislike_button_message=0x7f050034;
         public static final int error=0x7f050029;
         public static final int error_player=0x7f05001c;
         public static final int hello_user=0x7f050026;
         public static final int hello_world=0x7f05001a;
         public static final int like_button=0x7f050030;
+        public static final int like_button_message=0x7f050033;
         public static final int menu_settings=0x7f05001b;
         public static final int no_friends_selected=0x7f05002d;
         public static final int no_place_selected=0x7f05002e;

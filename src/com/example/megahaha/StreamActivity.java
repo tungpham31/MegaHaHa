@@ -36,6 +36,8 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		YouTubePlayer.PlaybackEventListener,
 		YouTubePlayer.PlayerStateChangeListener {
 
+	public static final String YOUTUBE_PLAYLIST_ID = "PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY";
+
 	private static final String URL_TO_GET_PLAYLIST_INFORMATION = "https://gdata.youtube.com/feeds/api/playlists/PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY?v=2";
 
 	private static final String DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS = "https://docs.google.com/document/d/1oj2RZfVzmjMJZ9h_yHictZO9KFbBcfb7y1poFvueFiQ/edit?usp=sharing";
@@ -180,7 +182,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 				if (gotBothVideoIDAndLinkUrl == 2)
 					linkVideoIDToYoutubeUrl();
 			}
-			
+
 			// refine String get from an URL
 			private String refine(String s) {
 				return s.replaceAll("&amp;", "&");
@@ -362,12 +364,12 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		int duration = Toast.LENGTH_SHORT;
 		switch (item.getItemId()) {
 		case R.id.menu_like:
-			text = "You like this video";
+			text = getString(R.string.like_button_message);
 			toast = Toast.makeText(context, text, duration);
 			toast.show();
 			return true;
 		case R.id.menu_dislike:
-			text = "You dislike this video";
+			text = getString(R.string.dislike_button_message);
 			toast = Toast.makeText(context, text, duration);
 			toast.show();
 			return true;
@@ -376,7 +378,12 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		}
 	}
 
-	// Call to update the share intent
+	/**
+	 * @param link
+	 *            : the url of the currently playing video. This url needs to be
+	 *            update so that users can share it if they want to. Update the
+	 *            newest link for the currently playing video
+	 */
 	private void updateShareActionProvider(String link) {
 		Intent shareIntent = new Intent();
 		shareIntent.setAction(Intent.ACTION_SEND);
@@ -391,8 +398,10 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	public void onInitializationSuccess(YouTubePlayer.Provider provider,
 			YouTubePlayer player, boolean wasRestored) {
 		if (!wasRestored) {
+			// if successfully initialize youtube player, start setting it up
+			// with playlist and listeners
 			youtubePlayer = player;
-			youtubePlayer.loadPlaylist("PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY",
+			youtubePlayer.loadPlaylist(YOUTUBE_PLAYLIST_ID,
 					mCurrentVideoNumber, mCurrentTimeInVideo);
 			youtubePlayer.setPlaylistEventListener(this);
 			youtubePlayer.setPlaybackEventListener(this);
@@ -403,7 +412,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	@Override
 	protected YouTubePlayer.Provider getYouTubePlayerProvider() {
 		return (YouTubePlayerView) findViewById(R.id.youtube_view);
-
 	}
 
 	@Override
