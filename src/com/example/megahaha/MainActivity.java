@@ -35,7 +35,6 @@ import java.util.Map;
 /**
  * The main activity.
  */
-@SuppressLint("NewApi")
 public final class MainActivity extends YouTubeBaseActivity implements OnInitializedListener,
         PlaylistEventListener, PlaybackEventListener, PlayerStateChangeListener {
     private static final String YOUTUBE_PLAYLIST_ID = "PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY";
@@ -84,8 +83,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
     /**
      * {@link ShareActionProvider} is used to support users to share link of the videos in playlist.
-     * Links can be Facebook urls or YouTube urls depending on whether that particular video has
-     * Facebook url or not.
+     * Links can be Facebook URLs or YouTube URLs depending on whether that particular video has
+     * Facebook URL or not.
      */
     private ShareActionProvider mShareActionProvider;
 
@@ -324,7 +323,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         getMenuInflater().inflate(R.menu.main, menu);
 
         // Locate MenuItem with ShareActionProvider.
-        MenuItem item = menu.findItem(R.id.menu_item_share);
+        final MenuItem item = menu.findItem(R.id.menu_item_share);
 
         // Fetch and store ShareActionProvider.
         mShareActionProvider = (ShareActionProvider) item.getActionProvider();
