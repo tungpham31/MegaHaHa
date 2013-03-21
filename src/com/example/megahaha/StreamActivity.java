@@ -28,19 +28,67 @@ import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
 import com.google.android.youtube.player.YouTubePlayerView;
 
 @SuppressLint("NewApi")
+/*
+ * Handling the Streaming Activity
+ */
 public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		YouTubePlayer.PlaylistEventListener,
 		YouTubePlayer.PlaybackEventListener,
 		YouTubePlayer.PlayerStateChangeListener {
+
+	private static final String DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS = "https://docs.google.com/document/d/1oj2RZfVzmjMJZ9h_yHictZO9KFbBcfb7y1poFvueFiQ/edit?usp=sharing";
+
+	/*
+	 * Keep a list of video ids in the same order as in the playlist. This list
+	 * is for later reference because youtube player does not support method to
+	 * get what video is currently played.
+	 */
 	private Map<Integer, String> mListOfVideoIDs = new HashMap<Integer, String>();
+
+	/*
+	 * ShareActionProvider is used to support users to share link of the videos
+	 * in playlist. Links can be facebook urls or youtube urls depending on
+	 * whether that particular video has facebook url or not
+	 */
 	private ShareActionProvider mShareActionProvider;
+
+	/*
+	 * keep track of position of the current video playing
+	 */
 	private int mCurrentVideoNumber = 0;
+
+	/*
+	 * keep track of current time in playing video. Let user start video where
+	 * they left off previous time
+	 */
 	private int mCurrentTimeInVideo = 0;
+
+	/*
+	 * a map from a videoID to its corresponding url (either facebook url or
+	 * youtube url)
+	 */
 	private Map<String, String> mLinkFromVideoIDToURL = new HashMap<String, String>();
+
+	/*
+	 * a list of video titles in the same order as in playlist
+	 */
 	private List<String> mListOfVideoTitles = new LinkedList<String>();
+
+	/*
+	 * a variable to determine whether both threads handling videoID and link
+	 * url have been done. When the value is 2, it means both threads are done
+	 */
 	private int gotBothVideoIDAndLinkUrl = 0;
+
+	/*
+	 * Shared Preferences to save variables
+	 */
 	private SharedPreferences mPref;
 	private SharedPreferences.Editor mPrefEditor;
+
+	/*
+	 * youtube player
+	 */
 	private YouTubePlayer youtubePlayer;
 
 	@Override
@@ -60,7 +108,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		mCurrentVideoNumber = mPref.getInt("mCurrentVideoNumber", 0);
 		mCurrentTimeInVideo = mPref.getInt("mCurrentTimeInVideo", 0);
 
-		// Get videos' ids and titles
+		// Get playlist information
 		getPlaylistInformation();
 
 		// Get url for each videoID
@@ -69,9 +117,9 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 	/*
 	 * Open a Google docs containing videoIDs and their respective urls on
-	 * Facebook. Read those url and link them to respective videoID With the
+	 * Facebook. Read those url and link them to respective videoID. With the
 	 * rest videos which doesn't have Facebook urls, simply link them to their
-	 * respective Youtube url
+	 * respective Youtube urls
 	 */
 	private void getUrlsForVideos() {
 		new AsyncTask<Void, Void, Void>() {
@@ -82,7 +130,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 				String data = "";
 				try {
 					fileURL = new URL(
-							"https://docs.google.com/document/d/1oj2RZfVzmjMJZ9h_yHictZO9KFbBcfb7y1poFvueFiQ/edit?usp=sharing");
+							DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS);
 
 					BufferedReader in = null;
 					in = new BufferedReader(new InputStreamReader(
@@ -232,7 +280,8 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			}
 
 			protected void onPostExecute(Void myVoid) {
-				// set title of the currently playing video right after the mListOfVideoTitles is
+				// set title of the currently playing video right after the
+				// mListOfVideoTitles is
 				// completely built
 				if (mCurrentVideoNumber < mListOfVideoTitles.size()) {
 					TextView videoTitle = (TextView) findViewById(R.id.video_title);
