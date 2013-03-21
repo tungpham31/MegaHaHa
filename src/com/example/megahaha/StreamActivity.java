@@ -168,9 +168,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			protected void onPostExecute(String result) {
 				getVideoTitlesFromPlaylistData(result);
 				getVideoIDFromPlaylistData(result);
-				gotBothVideoIDAndLinkUrl++;
-				if (gotBothVideoIDAndLinkUrl == 2)
-					linkVideoIDToYoutubeUrl();
 				Log.i("Thread", "Finish getPlaylistInformation");
 			}
 
@@ -199,6 +196,12 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 					}
 				}
 				return null;
+			}
+
+			protected void onPostExecute(Void myVoid) {
+				gotBothVideoIDAndLinkUrl++;
+				if (gotBothVideoIDAndLinkUrl == 2)
+					linkVideoIDToYoutubeUrl();
 			}
 
 		}.execute(data);
@@ -244,6 +247,13 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 				mLinkFromVideoIDToURL.put(videoID, youtubeURL);
 			}
 		}
+
+		// after completing with mLinkFromVideoIDToURL, we update
+		// ShareActionProvider with the link for currently playing video right
+		// away
+		String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
+		String videoURL = mLinkFromVideoIDToURL.get(videoID);
+		updateShareActionProvider(videoURL);
 	}
 
 	// refine String get from an URL
@@ -342,7 +352,8 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	protected void onPause() {
 		System.out.println(youtubePlayer.getCurrentTimeMillis());
 		mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
-		mPrefEditor.putInt("mCurrentTimeInVideo", youtubePlayer.getCurrentTimeMillis());
+		mPrefEditor.putInt("mCurrentTimeInVideo",
+				youtubePlayer.getCurrentTimeMillis());
 		mPrefEditor.commit();
 		super.onPause();
 	}
@@ -397,7 +408,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			TextView videoTitle = (TextView) findViewById(R.id.video_title);
 			videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
 		}
-		
+
 		// update the link to share for this currently playing video
 		Intent sendIntent = new Intent();
 		sendIntent.setAction(Intent.ACTION_SEND);
