@@ -1,11 +1,12 @@
 package com.example.megahaha;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ShareActionProvider;
@@ -24,12 +25,10 @@ import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerView;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,14 +53,23 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
      * reference because YouTube player does not support method to get what video is currently
      * played.
      */
-    private Map<Integer, String> mListOfVideoIDs = new HashMap<Integer, String>();
+    private List<String> mVideoIds = new ArrayList<String>();
 
     /**
-     * ShareActionProvider is used to support users to share link of the videos in playlist. Links
-     * can be Facebook urls or YouTube urls depending on whether that particular video has Facebook
-     * url or not.
+     * A map from a video id to its corresponding URL (either Facebook URL or YouTube URL).
      */
-    private ShareActionProvider mShareActionProvider;
+    private Map<String, String> mUrlMap = new HashMap<String, String>();
+
+    /**
+     * A list of video titles in the same order as in playlist.
+     */
+    private List<String> mVideoTitles = new ArrayList<String>();
+
+    /**
+     * A variable to determine whether both threads handling video id and link URL have finished.
+     * When the value is 2, it means both threads are done
+     */
+    private int mGotBothVideoIdsAndLinkUrls = 0;
 
     /**
      * Keep track of position of the current video playing.
@@ -75,26 +83,16 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private int mCurrentTimeInVideo = 0;
 
     /**
-     * A map from a video id to its corresponding URL (either Facebook URL or YouTube URL).
+     * {@link ShareActionProvider} is used to support users to share link of the videos in playlist.
+     * Links can be Facebook urls or YouTube urls depending on whether that particular video has
+     * Facebook url or not.
      */
-    private Map<String, String> mLinkFromVideoIDToURL = new HashMap<String, String>();
+    private ShareActionProvider mShareActionProvider;
 
     /**
-     * a list of video titles in the same order as in playlist
+     * Shared Preferences to save variables.
      */
-    private List<String> mListOfVideoTitles = new LinkedList<String>();
-
-    /**
-     * a variable to determine whether both threads handling videoID and link url have been done.
-     * When the value is 2, it means both threads are done
-     */
-    private int gotBothVideoIDAndLinkUrl = 0;
-
-    /**
-     * Shared Preferences to save variables
-     */
-    private SharedPreferences mPref;
-    private SharedPreferences.Editor mPrefEditor;
+    private Editor mPrefEditor;
 
     /**
      * YouTube player.
@@ -112,81 +110,187 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         youTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
         // Get Shared Preference.
-        mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
-        mPrefEditor = mPref.edit();
+        final SharedPreferences prefs = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+        mPrefEditor = prefs.edit();
 
         // Get current video and current time playing from Shared Preference.
-        mCurrentVideoNumber = mPref.getInt("mCurrentVideoNumber", 0);
-        mCurrentTimeInVideo = mPref.getInt("mCurrentTimeInVideo", 0);
+        mCurrentVideoNumber = prefs.getInt("mCurrentVideoNumber", 0);
+        mCurrentTimeInVideo = prefs.getInt("mCurrentTimeInVideo", 0);
 
-        // Get playlist information
+        // Get playlist information.
         getPlaylistInformation();
 
-        // Get url for each videoID
+        // Get URL for each video id.
         getUrlsForVideos();
     }
 
     /**
-     * Open a Google docs containing videoIDs and their respective urls on Facebook. Read those url
-     * and link them to respective videoID. With the rest videos which doesn't have Facebook urls,
-     * simply link them to their respective Youtube urls
+     * Opens connection to an URL containing information about the playlist. Read video titles and
+     * put into mVideoTitles. Read videos' id and put into mVideoIds
+     */
+    private void getPlaylistInformation() {
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                // Read data from YouTube playlist.
+                BufferedReader reader = null;
+                try {
+                    reader =
+                            new BufferedReader(new InputStreamReader(new URL(
+                                    URL_TO_GET_PLAYLIST_INFORMATION).openStream()));
+
+                    final StringBuilder builder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        builder.append(line);
+                    }
+
+                    return builder.toString();
+                } catch (Exception e) {
+                    return null;
+                } finally {
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (Exception e) {
+                            // Do nothing.
+                        }
+                    }
+                }
+            }
+
+            protected void onPostExecute(String result) {
+                if (TextUtils.isEmpty(result)) {
+                    // TODO: error message here.
+                }
+
+                // With the data read from YouTube playlist, call two methods to extract video
+                // titles and video ids from that data.
+                getVideoTitlesFromPlaylistData(result);
+                getVideoIDFromPlaylistData(result);
+
+                // Increase mGotBothVideoIdsAndLinkUrls, indicating that one of the two threads
+                // is done.
+                mGotBothVideoIdsAndLinkUrls++;
+
+                // If both threads are done, call new method to get any video that does not get
+                // linked to a Facebook URL and link it to its respective YouTube URL.
+                if (mGotBothVideoIdsAndLinkUrls == 2) {
+                    linkVideoIdsToYoutubeUrls();
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * Extracts video ids from data and put them in order into mVideoIds.
+     * @param data
+     *            : YouTube playlist's information
+     */
+    private void getVideoIDFromPlaylistData(String data) {
+        final String targetString = "https://www.youtube.com/v/";
+        int pos;
+
+        while ((pos = data.indexOf(targetString)) != -1) {
+            data = data.substring(pos + targetString.length());
+            final String videoId = data.substring(0, 11);
+            if (!mVideoIds.contains(videoId)) {
+                mVideoIds.add(videoId);
+            }
+        }
+    }
+
+    /**
+     * Extract video titles from data and put them in order into mVideoTitles.
+     * @param data
+     *            : YouTube playlist's information
+     */
+    private void getVideoTitlesFromPlaylistData(String data) {
+        while (true) {
+            int top = data.indexOf("<title>");
+            if (top == -1) {
+                break;
+            }
+            int bot = data.indexOf("</title>");
+            mVideoTitles.add(data.substring(top + 7, bot));
+            data = data.substring(bot + 4, data.length());
+        }
+
+        mVideoTitles.remove(0); // the first title is the title of the playlist, we don't need it
+
+        if (mCurrentVideoNumber < mVideoTitles.size()) {
+            final TextView videoTitle = (TextView) findViewById(R.id.video_title);
+            videoTitle.setText(mVideoTitles.get(mCurrentVideoNumber));
+        }
+    }
+
+    /**
+     * Open a Google Doc containing video ids and their respective URLs on Facebook. Read those URLs
+     * and link them to respective video ids. With the rest videos which doesn't have Facebook URLs,
+     * simply link them to their respective YouTube URLs
      */
     private void getUrlsForVideos() {
-        new AsyncTask<Void, Void, Void>() {
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+                // Get data from the Google Doc document.
+                BufferedReader reader = null;
+                try {
+                    reader =
+                            new BufferedReader(new InputStreamReader(new URL(
+                                    DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS).openStream()));
+
+                    // Handling data from the text file.
+                    final StringBuilder builder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        builder.append(line);
+                    }
+
+                    return builder.toString();
+                } catch (Exception e) {
+                    return null;
+                } finally {
+                    if (reader != null) {
+                        try {
+                            reader.close();
+                        } catch (Exception e) {
+                            // Do nothing.
+                        }
+                    }
+                }
+            }
 
             @Override
-            protected Void doInBackground(Void... params) {
-                // get data from the Google Doc document
-                URL fileURL = null;
-                String data = "";
-                try {
-                    fileURL = new URL(DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS);
-
-                    BufferedReader in = null;
-                    in = new BufferedReader(new InputStreamReader(fileURL.openStream()));
-
-                    // handling data from the text file
-                    String inputLine;
-                    while ((inputLine = in.readLine()) != null)
-                        data += inputLine;
-
-                    in.close();
-                } catch (MalformedURLException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+            protected void onPostExecute(String result) {
+                if (TextUtils.isEmpty(result)) {
+                    return;
                 }
 
-                // handle the data from the text file: linking videos to their
-                // corresponding facebook urls
+                // Handle the data from the text file: linking videos to their corresponding
+                // Facebook URLs.
                 int startPosition = 0;
                 int endPosition = 0;
-                while ((startPosition = data.indexOf("/START/")) != -1) {
-                    endPosition = data.indexOf("/END/");
-                    String[] values = data.substring(startPosition + 7, endPosition).split(" ");
-                    data = data.substring(endPosition + 5);
-                    values[1] = refine(values[1]);
-                    mLinkFromVideoIDToURL.put(values[0], values[1]);
+                while ((startPosition = result.indexOf("/START/")) != -1) {
+                    endPosition = result.indexOf("/END/");
+                    final String[] values =
+                            result.substring(startPosition + 7, endPosition).split(" ");
+                    result = result.substring(endPosition + 5);
+                    mUrlMap.put(values[0], refine(values[1]));
                 }
 
-                return null;
+                // Increase gotBothVideoIDAndLinkUrl, indicating that one of the two threads is done
+                mGotBothVideoIdsAndLinkUrls++;
+
+                // If both threads are done, call new method to get any video that does not get
+                // linked to a Facebook URL and link it to its respective YouTube URL.
+                if (mGotBothVideoIdsAndLinkUrls == 2)
+                    linkVideoIdsToYoutubeUrls();
             }
 
-            protected void onPostExecute(Void voids) {
-                // increase gotBothVideoIDAndLinkUrl, indicating that one of the
-                // two threads is done
-                gotBothVideoIDAndLinkUrl++;
-
-                // if both threads are done, call new method to get any video
-                // that does not get linked to a facebook url and link it to its
-                // respective youtube url
-                if (gotBothVideoIDAndLinkUrl == 2)
-                    linkVideoIDToYoutubeUrl();
-            }
-
-            // refine String get from an URL
+            /**
+             * Refines String get from an URL.
+             */
             private String refine(String s) {
                 return s.replaceAll("&amp;", "&");
             }
@@ -195,147 +299,22 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     }
 
     /**
-     * Open connection to an url containing information about the playlist. Read videos' title and
-     * put into mListOfVideoTitles. Read videos' id and put into mListOfVideoIDs
+     * After we get Facebook URLs and link them to their corresponding video ids, there are some
+     * video id left that does not link to any Facebook URLs. We simply link those to their
+     * corresponding YouTube URLs
      */
-    private void getPlaylistInformation() {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                // read data from youtube playlist
-                String data = "";
-                URL youtubePlaylist;
-                try {
-                    youtubePlaylist = new URL(URL_TO_GET_PLAYLIST_INFORMATION);
-                    BufferedReader in;
-                    in = new BufferedReader(new InputStreamReader(youtubePlaylist.openStream()));
-
-                    String inputLine;
-
-                    while ((inputLine = in.readLine()) != null)
-                        data += inputLine;
-
-                    in.close();
-                } catch (MalformedURLException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-
-                return data;
-            }
-
-            protected void onPostExecute(String result) {
-                // with the data read from youtube playlist, call two methods to
-                // extract video titles and video ids from that data
-                getVideoTitlesFromPlaylistData(result);
-                getVideoIDFromPlaylistData(result);
-            }
-
-        }.execute();
-    }
-
-    /**
-     * @param data
-     *            : youtube playlist's information extract video ids from data and put them in order
-     *            into mListOfVideoIDs
-     */
-    private void getVideoIDFromPlaylistData(String data) {
-        new AsyncTask<String, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(String... params) {
-                String data = params[0];
-                String targetString = "https://www.youtube.com/v/";
-                int pos;
-                int nVideos = 0;
-                while ((pos = data.indexOf(targetString)) != -1) {
-                    data = data.substring(pos + targetString.length());
-                    String videoID = data.substring(0, 11);
-                    if (!mListOfVideoIDs.containsValue(videoID)) {
-                        mListOfVideoIDs.put(new Integer(nVideos), videoID);
-                        nVideos++;
-                    }
-                }
-                return null;
-            }
-
-            protected void onPostExecute(Void myVoid) {
-                // increase gotBothVideoIDAndLinkUrl to indicate that it's done
-                // with getting video ids
-                gotBothVideoIDAndLinkUrl++;
-
-                // if both threads are done, call to a method to handle the job
-                // left
-                if (gotBothVideoIDAndLinkUrl == 2)
-                    linkVideoIDToYoutubeUrl();
-            }
-
-        }.execute(data);
-    }
-
-    /**
-     * @param data
-     *            : youtube playlist's information extract video titles from data and put them in
-     *            order into mListOfVideoTitles
-     */
-    private void getVideoTitlesFromPlaylistData(String data) {
-        new AsyncTask<String, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(String... params) {
-                String data = params[0];
-                while (true) {
-                    int top = data.indexOf("<title>");
-                    if (top == -1)
-                        break;
-                    int bot = data.indexOf("</title>");
-                    String title = data.substring(top + 7, bot);
-                    mListOfVideoTitles.add(title);
-                    data = data.substring(bot + 4, data.length());
-                }
-                mListOfVideoTitles.remove(0); // the first title is the title of
-                                              // the playlist, we don't need
-                                              // it
-                return null;
-            }
-
-            protected void onPostExecute(Void myVoid) {
-                // set title of the currently playing video right after the
-                // mListOfVideoTitles is completely built
-                if (mCurrentVideoNumber < mListOfVideoTitles.size()) {
-                    TextView videoTitle = (TextView) findViewById(R.id.video_title);
-                    videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
-                }
-            }
-
-        }.execute(data);
-    }
-
-    /**
-     * after we get facebook urls and link them to their corresponding videoIDs, there are some
-     * videoID left that does not link to any facebook urls. We simply link those to their
-     * corresponding youtube urls
-     */
-    private void linkVideoIDToYoutubeUrl() {
-        // handle the rest videoID which does not match to a facebook
-        // URL
-        for (int i = 0; i <= mListOfVideoIDs.size() - 1; i++) {
-            String videoID = mListOfVideoIDs.get(new Integer(i));
-            if (!mLinkFromVideoIDToURL.containsKey(videoID)) {
-                String youtubeURL = "http://www.youtube.com/watch?v=" + videoID;
-                mLinkFromVideoIDToURL.put(videoID, youtubeURL);
+    private void linkVideoIdsToYoutubeUrls() {
+        // Handle the rest video ids which does not match to a Facebook URL.
+        for (String videoId : mVideoIds) {
+            if (!mUrlMap.containsKey(videoId)) {
+                mUrlMap.put(videoId, "http://www.youtube.com/watch?v=" + videoId);
             }
         }
 
-        // after completing with mLinkFromVideoIDToURL, we update
-        // ShareActionProvider with the link for currently playing video right
-        // away
-        String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
-        String videoURL = mLinkFromVideoIDToURL.get(videoID);
-        updateShareActionProvider(videoURL);
+        // After completing with mLinkFromVideoIDToURL, we update ShareActionProvider with the link
+        // for currently playing video right away.
+        final String videoId = mVideoIds.get(mCurrentVideoNumber);
+        updateShareActionProvider(mUrlMap.get(videoId));
     }
 
     @SuppressLint("NewApi")
@@ -344,10 +323,10 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
-        // Locate MenuItem with ShareActionProvider
+        // Locate MenuItem with ShareActionProvider.
         MenuItem item = menu.findItem(R.id.menu_item_share);
 
-        // Fetch and store ShareActionProvider
+        // Fetch and store ShareActionProvider.
         mShareActionProvider = (ShareActionProvider) item.getActionProvider();
         updateShareActionProvider(null);
 
@@ -356,21 +335,15 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        Context context = getApplicationContext();
-        CharSequence text;
-        Toast toast;
-        int duration = Toast.LENGTH_SHORT;
+        // Handle item selection.
         switch (item.getItemId()) {
             case R.id.menu_like:
-                text = getString(R.string.like_button_message);
-                toast = Toast.makeText(context, text, duration);
-                toast.show();
+                Toast.makeText(this, getString(R.string.like_button_message), Toast.LENGTH_SHORT)
+                        .show();
                 return true;
             case R.id.menu_dislike:
-                text = getString(R.string.dislike_button_message);
-                toast = Toast.makeText(context, text, duration);
-                toast.show();
+                Toast.makeText(this, getString(R.string.dislike_button_message), Toast.LENGTH_SHORT)
+                        .show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -385,43 +358,35 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
      */
     @SuppressLint("NewApi")
     private void updateShareActionProvider(String link) {
-        Intent shareIntent = new Intent();
-        shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_TEXT, link);
-        shareIntent.setType("text/plain");
+        final Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, link);
+        intent.setType("text/plain");
         if (mShareActionProvider != null) {
-            mShareActionProvider.setShareIntent(shareIntent);
+            mShareActionProvider.setShareIntent(intent);
         }
     }
 
     @Override
     public void
             onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
-        // If successfully initialize YouTube player, store that player in a
-        // glocal mYouTubePlayer. Set up listeners for the player.
+        // If successfully initialize YouTube player, store that player in a glocal mYouTubePlayer.
+        // Set up listeners for the player.
         mYouTubePlayer = player;
         mYouTubePlayer.setPlaylistEventListener(this);
         mYouTubePlayer.setPlaybackEventListener(this);
         mYouTubePlayer.setPlayerStateChangeListener(this);
 
-        // If the playlist is not restored, we have load it into the youtube
-        // player.
+        // If the playlist is not restored, we have load it into the YouTube player.
         if (!wasRestored)
             mYouTubePlayer.loadPlaylist(YOUTUBE_PLAYLIST_ID, mCurrentVideoNumber,
                     mCurrentTimeInVideo);
     }
 
     @Override
-    /**
-     * when playing next video on playlist
-     */
     public void onNext() {
         mCurrentVideoNumber++;
     }
 
-    /**
-     * when playing previous video on playlist
-     */
     @Override
     public void onPrevious() {
         mCurrentVideoNumber--;
@@ -433,7 +398,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         // Necessary to clear first if we save preferences onPause.
         mPrefEditor.clear();
-        // save position of current video and current time in it
+        // Save position of current video and current time in it.
         mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
         if (mYouTubePlayer != null) {
             mPrefEditor.putInt("mCurrentTimeInVideo", mYouTubePlayer.getCurrentTimeMillis());
@@ -444,14 +409,14 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     @Override
     public void onLoading() {
         // Set title of the video.
-        if (mCurrentVideoNumber < mListOfVideoTitles.size()) {
+        if (mCurrentVideoNumber < mVideoTitles.size()) {
             TextView videoTitle = (TextView) findViewById(R.id.video_title);
-            videoTitle.setText(mListOfVideoTitles.get(mCurrentVideoNumber));
+            videoTitle.setText(mVideoTitles.get(mCurrentVideoNumber));
         }
 
         // Update the link to share for this currently playing video.
-        final String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
-        final String videoURL = mLinkFromVideoIDToURL.get(videoID);
+        final String videoID = mVideoIds.get(new Integer(mCurrentVideoNumber));
+        final String videoURL = mUrlMap.get(videoID);
         updateShareActionProvider(videoURL);
     }
 
