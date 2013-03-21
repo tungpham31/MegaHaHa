@@ -1,0 +1,3 @@
+List of errors need to be fixed:
+1. When there is no internet, the app simply crash
+2. Menu does not work with older version of android
