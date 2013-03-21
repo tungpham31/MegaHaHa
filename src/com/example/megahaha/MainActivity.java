@@ -18,7 +18,6 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
 import com.google.android.youtube.player.YouTubePlayer.OnInitializedListener;
-import com.google.android.youtube.player.YouTubePlayer.PlaybackEventListener;
 import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
@@ -36,7 +35,7 @@ import java.util.Map;
  * The main activity.
  */
 public final class MainActivity extends YouTubeBaseActivity implements OnInitializedListener,
-        PlaylistEventListener, PlaybackEventListener, PlayerStateChangeListener {
+        PlaylistEventListener, PlayerStateChangeListener {
     private static final String YOUTUBE_PLAYLIST_ID = "PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY";
 
     private static final String URL_TO_GET_PLAYLIST_INFORMATION =
@@ -123,6 +122,31 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         getUrlsForVideos();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Necessary to clear first if we save preferences onPause.
+        mPrefEditor.clear();
+
+        // Save position of current video and current time in it.
+        mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
+        if (mYouTubePlayer != null) {
+            mPrefEditor.putInt("mCurrentTimeInVideo", mYouTubePlayer.getCurrentTimeMillis());
+        }
+        mPrefEditor.commit();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mYouTubePlayer != null) {
+            mYouTubePlayer.release();
+            mYouTubePlayer = null;
+        }
+    }
+
     /**
      * Opens connection to an URL containing information about the playlist. Read video titles and
      * put into mVideoTitles. Read videos' id and put into mVideoIds
@@ -160,7 +184,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
             protected void onPostExecute(String result) {
                 if (TextUtils.isEmpty(result)) {
-                    // TODO: error message here.
+                    return;
                 }
 
                 // With the data read from YouTube playlist, call two methods to extract video
@@ -368,11 +392,10 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     @Override
     public void
             onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
-        // If successfully initialize YouTube player, store that player in a glocal mYouTubePlayer.
+        // If successfully initialize YouTube player, store that player in a global mYouTubePlayer.
         // Set up listeners for the player.
         mYouTubePlayer = player;
         mYouTubePlayer.setPlaylistEventListener(this);
-        mYouTubePlayer.setPlaybackEventListener(this);
         mYouTubePlayer.setPlayerStateChangeListener(this);
 
         // If the playlist is not restored, we have load it into the YouTube player.
@@ -392,17 +415,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
-        // Necessary to clear first if we save preferences onPause.
-        mPrefEditor.clear();
-        // Save position of current video and current time in it.
-        mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
-        if (mYouTubePlayer != null) {
-            mPrefEditor.putInt("mCurrentTimeInVideo", mYouTubePlayer.getCurrentTimeMillis());
-        }
-        mPrefEditor.commit();
+    public void onPlaylistEnded() {
+        // Do nothing.
     }
 
     @Override
@@ -419,36 +433,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
             final String videoURL = mUrlMap.get(videoID);
             updateShareActionProvider(videoURL);
         }
-    }
-
-    @Override
-    public void onPlaylistEnded() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onBuffering(boolean isBuffering) {
-        // Do nothing.
-    }
-
-    @Override
-    public void onPlaying() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onSeekTo(int newPositionMillis) {
-        // Do nothing.
-    }
-
-    @Override
-    public void onStopped() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onPaused() {
-        // Do nothing.
     }
 
     @Override
@@ -490,7 +474,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RECOVERY_DIALOG_REQUEST) {
-            // Retry initialization if user performed a recovery action
+            // Retry initialization if user performed a recovery action.
             ((YouTubePlayerView) findViewById(R.id.youtube_view)).initialize(
                     DeveloperKey.DEVELOPER_KEY, this);
         }
