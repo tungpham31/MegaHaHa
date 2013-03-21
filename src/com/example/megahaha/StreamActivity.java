@@ -36,57 +36,59 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		YouTubePlayer.PlaybackEventListener,
 		YouTubePlayer.PlayerStateChangeListener {
 
+	private static final String URL_TO_GET_PLAYLIST_INFORMATION = "https://gdata.youtube.com/feeds/api/playlists/PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY?v=2";
+
 	private static final String DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS = "https://docs.google.com/document/d/1oj2RZfVzmjMJZ9h_yHictZO9KFbBcfb7y1poFvueFiQ/edit?usp=sharing";
 
-	/*
+	/**
 	 * Keep a list of video ids in the same order as in the playlist. This list
 	 * is for later reference because youtube player does not support method to
 	 * get what video is currently played.
 	 */
 	private Map<Integer, String> mListOfVideoIDs = new HashMap<Integer, String>();
 
-	/*
+	/**
 	 * ShareActionProvider is used to support users to share link of the videos
 	 * in playlist. Links can be facebook urls or youtube urls depending on
 	 * whether that particular video has facebook url or not
 	 */
 	private ShareActionProvider mShareActionProvider;
 
-	/*
+	/**
 	 * keep track of position of the current video playing
 	 */
 	private int mCurrentVideoNumber = 0;
 
-	/*
+	/**
 	 * keep track of current time in playing video. Let user start video where
 	 * they left off previous time
 	 */
 	private int mCurrentTimeInVideo = 0;
 
-	/*
+	/**
 	 * a map from a videoID to its corresponding url (either facebook url or
 	 * youtube url)
 	 */
 	private Map<String, String> mLinkFromVideoIDToURL = new HashMap<String, String>();
 
-	/*
+	/**
 	 * a list of video titles in the same order as in playlist
 	 */
 	private List<String> mListOfVideoTitles = new LinkedList<String>();
 
-	/*
+	/**
 	 * a variable to determine whether both threads handling videoID and link
 	 * url have been done. When the value is 2, it means both threads are done
 	 */
 	private int gotBothVideoIDAndLinkUrl = 0;
 
-	/*
+	/**
 	 * Shared Preferences to save variables
 	 */
 	private SharedPreferences mPref;
 	private SharedPreferences.Editor mPrefEditor;
 
-	/*
+	/**
 	 * youtube player
 	 */
 	private YouTubePlayer youtubePlayer;
@@ -115,7 +117,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		getUrlsForVideos();
 	}
 
-	/*
+	/**
 	 * Open a Google docs containing videoIDs and their respective urls on
 	 * Facebook. Read those url and link them to respective videoID. With the
 	 * rest videos which doesn't have Facebook urls, simply link them to their
@@ -126,6 +128,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 			@Override
 			protected Void doInBackground(Void... params) {
+				// get data from the Google Doc document
 				URL fileURL = null;
 				String data = "";
 				try {
@@ -150,7 +153,8 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 					e.printStackTrace();
 				}
 
-				// handle data get from the text file
+				// handle the data from the text file: linking videos to their
+				// corresponding facebook urls
 				int startPosition = 0;
 				int endPosition = 0;
 				while ((startPosition = data.indexOf("/START/")) != -1) {
@@ -166,10 +170,20 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			}
 
 			protected void onPostExecute(Void voids) {
+				// increase gotBothVideoIDAndLinkUrl, indicating that one of the
+				// two threads is done
 				gotBothVideoIDAndLinkUrl++;
+
+				// if both threads are done, call new method to get any video
+				// that does not get linked to a facebook url and link it to its
+				// respective youtube url
 				if (gotBothVideoIDAndLinkUrl == 2)
 					linkVideoIDToYoutubeUrl();
-				Log.i("Thread", "finish getUrlsForVideos");
+			}
+			
+			// refine String get from an URL
+			private String refine(String s) {
+				return s.replaceAll("&amp;", "&");
 			}
 
 		}.execute();
@@ -185,13 +199,11 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 			@Override
 			protected String doInBackground(Void... params) {
-				// TODO Auto-generated method stub
-				// get data about youtube playlist
+				// read data from youtube playlist
 				String data = "";
 				URL youtubePlaylist;
 				try {
-					youtubePlaylist = new URL(
-							"https://gdata.youtube.com/feeds/api/playlists/PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY?v=2");
+					youtubePlaylist = new URL(URL_TO_GET_PLAYLIST_INFORMATION);
 					BufferedReader in;
 					in = new BufferedReader(new InputStreamReader(
 							youtubePlaylist.openStream()));
@@ -214,9 +226,10 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			}
 
 			protected void onPostExecute(String result) {
+				// with the data read from youtube playlist, call two methods to
+				// extract video titles and video ids from that data
 				getVideoTitlesFromPlaylistData(result);
 				getVideoIDFromPlaylistData(result);
-				Log.i("Thread", "Finish getPlaylistInformation");
 			}
 
 		}.execute();
@@ -224,7 +237,8 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 	/**
 	 * @param data
-	 * @return
+	 *            : youtube playlist's information extract video ids from data
+	 *            and put them in order into mListOfVideoIDs
 	 */
 	private void getVideoIDFromPlaylistData(String data) {
 		new AsyncTask<String, Void, Void>() {
@@ -247,7 +261,12 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 			}
 
 			protected void onPostExecute(Void myVoid) {
+				// increase gotBothVideoIDAndLinkUrl to indicate that it's done
+				// with getting video ids
 				gotBothVideoIDAndLinkUrl++;
+
+				// if both threads are done, call to a method to handle the job
+				// left
 				if (gotBothVideoIDAndLinkUrl == 2)
 					linkVideoIDToYoutubeUrl();
 			}
@@ -257,6 +276,8 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 	/**
 	 * @param data
+	 *            : youtube playlist's information extract video titles from
+	 *            data and put them in order into mListOfVideoTitles
 	 */
 	private void getVideoTitlesFromPlaylistData(String data) {
 		new AsyncTask<String, Void, Void>() {
@@ -281,8 +302,7 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 
 			protected void onPostExecute(Void myVoid) {
 				// set title of the currently playing video right after the
-				// mListOfVideoTitles is
-				// completely built
+				// mListOfVideoTitles is completely built
 				if (mCurrentVideoNumber < mListOfVideoTitles.size()) {
 					TextView videoTitle = (TextView) findViewById(R.id.video_title);
 					videoTitle.setText(mListOfVideoTitles
@@ -294,7 +314,9 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 	}
 
 	/**
-	 * 
+	 * after we get facebook urls and link them to their corresponding videoIDs,
+	 * there are some videoID left that does not link to any facebook urls. We
+	 * simply link those to their corresponding youtube urls
 	 */
 	private void linkVideoIDToYoutubeUrl() {
 		// handle the rest videoID which does not match to a facebook
@@ -313,11 +335,6 @@ public class StreamActivity extends YouTubeFailureRecoveryActivity implements
 		String videoID = mListOfVideoIDs.get(new Integer(mCurrentVideoNumber));
 		String videoURL = mLinkFromVideoIDToURL.get(videoID);
 		updateShareActionProvider(videoURL);
-	}
-
-	// refine String get from an URL
-	private String refine(String s) {
-		return s.replaceAll("&amp;", "&");
 	}
 
 	@SuppressLint("NewApi")
