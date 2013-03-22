@@ -42,7 +42,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private static final String YOUTUBE_PLAYLIST_ID = "PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY";
 
     private static final String URL_TO_GET_PLAYLIST_INFORMATION =
-            "https://gdata.youtube.com/feeds/api/playlists/PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY?v=2";
+            "https://gdata.youtube.com/feeds/api/playlists/PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY?v=2&max-results=50&start-index=";
 
     private static final String DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS =
             "https://docs.google.com/document/d/1oj2RZfVzmjMJZ9h_yHictZO9KFbBcfb7y1poFvueFiQ/edit?usp=sharing";
@@ -71,6 +71,11 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
      * When the value is 2, it means both threads are done
      */
     private int mGotBothVideoIdsAndLinkUrls = 0;
+
+    /**
+     * Keep track of position of the first video played.
+     */
+    private int mFirstVideoNumber = 0;
 
     /**
      * Keep track of position of the current video playing.
@@ -122,6 +127,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         }
 
         // Get playlist information.
+        mFirstVideoNumber = mCurrentVideoNumber;
         getPlaylistInformation();
 
         // Get URL for each video id.
@@ -167,8 +173,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                 BufferedReader reader = null;
                 try {
                     reader =
-                            new BufferedReader(new InputStreamReader(new URL(
-                                    URL_TO_GET_PLAYLIST_INFORMATION).openStream()));
+                            new BufferedReader(new InputStreamReader(
+                                    new URL(URL_TO_GET_PLAYLIST_INFORMATION
+                                            + (mFirstVideoNumber + 1)).openStream()));
 
                     final StringBuilder builder = new StringBuilder();
                     String line;
@@ -311,8 +318,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
                 // If both threads are done, call new method to get any video that does not get
                 // linked to a Facebook URL and link it to its respective YouTube URL.
-                if (mGotBothVideoIdsAndLinkUrls == 2)
+                if (mGotBothVideoIdsAndLinkUrls >= 2) {
                     linkVideoIdsToYoutubeUrls();
+                }
             }
 
             /**
@@ -338,10 +346,11 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
             }
         }
 
-        // After completing with mLinkFromVideoIDToURL, we update {@link ShareActionProvider} with
-        // the link for currently playing video right away.
-        if (mCurrentVideoNumber < mVideoIds.size()) {
-            final String videoId = mVideoIds.get(mCurrentVideoNumber);
+        // After completing with mUrlMap, we update {@link ShareActionProvider} with the link for
+        // currently playing video right away.
+        final int delta = mCurrentVideoNumber - mFirstVideoNumber;
+        if (delta >= 0 && delta < mVideoIds.size()) {
+            final String videoId = mVideoIds.get(delta);
             updateShareActionProvider(mUrlMap.get(videoId));
         }
     }
@@ -379,13 +388,14 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
      */
     private void updateTitle() {
         // Set title of the video.
-        if (mCurrentVideoNumber < mVideoTitles.size()) {
+        final int delta = mCurrentVideoNumber - mFirstVideoNumber;
+        if (0 <= delta && delta < mVideoTitles.size()) {
             final TextView videoTitle = (TextView) findViewById(R.id.video_title);
             if (isLandscape()) {
                 videoTitle.setVisibility(View.GONE);
-                setTitle(mVideoTitles.get(mCurrentVideoNumber));
+                setTitle(mVideoTitles.get(delta));
             } else {
-                videoTitle.setText(mVideoTitles.get(mCurrentVideoNumber));
+                videoTitle.setText(mVideoTitles.get(delta));
             }
         }
     }
