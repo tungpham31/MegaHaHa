@@ -349,7 +349,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         // After completing with mUrlMap, we update {@link ShareActionProvider} with the link for
         // currently playing video right away.
         final int delta = mCurrentVideoNumber - mFirstVideoNumber;
-        if (delta >= 0 && delta < mVideoIds.size()) {
+        if (0 <= delta && delta < mVideoIds.size()) {
             final String videoId = mVideoIds.get(delta);
             updateShareActionProvider(mUrlMap.get(videoId));
         }
@@ -453,8 +453,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         updateTitle();
 
         // Update the link to share for this currently playing video.
-        if (mCurrentVideoNumber < mVideoIds.size()) {
-            final String videoId = mVideoIds.get(mCurrentVideoNumber);
+        final int delta = mCurrentVideoNumber - mFirstVideoNumber;
+        if (0 <= delta && delta < mVideoIds.size()) {
+            final String videoId = mVideoIds.get(delta);
             updateShareActionProvider(mUrlMap.get(videoId));
         }
     }
