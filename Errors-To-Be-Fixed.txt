@@ -1,3 +1,5 @@
 List of errors need to be fixed:
 1. When there is no internet, the app simply crash
 2. Crash every time when reaching end of stream
+3, Rotate more than one, lose title
+4. Tai sao lai chuyen title thanh chu be
