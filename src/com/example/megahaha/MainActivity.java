@@ -195,21 +195,17 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                     return;
                 }
 
-                // With the data read from YouTube playlist, call two methods to
-                // extract video
+                // With the data read from YouTube playlist, call two methods to extract video
                 // titles and video ids from that data.
                 getVideoTitlesFromPlaylistData(result);
                 getVideoIdsFromPlaylistData(result);
 
-                // Increase mGotBothVideoIdsAndLinkUrls, indicating that one of
-                // the two threads
+                // Increase mGotBothVideoIdsAndLinkUrls, indicating that one of the two threads
                 // is done.
                 mGotBothVideoIdsAndLinkUrls++;
 
-                // If both threads are done, call new method to get any video
-                // that does not get
-                // linked to a Facebook URL and link it to its respective
-                // YouTube URL.
+                // If both threads are done, call new method to get any video that does not get
+                // linked to a Facebook URL and link it to its respective YouTube URL.
                 if (mGotBothVideoIdsAndLinkUrls == 2) {
                     linkVideoIdsToYoutubeUrls();
                 }
@@ -233,8 +229,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
             data = data.substring(bot + 4, data.length());
         }
 
-        mVideoTitles.remove(0); // the first title is the title of the playlist,
-                                // we don't need it.
+        mVideoTitles.remove(0); // the first title is the title of the playlist, we don't need it.
         updateTitle();
     }
 
@@ -299,8 +294,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                     return;
                 }
 
-                // Handle the data from the text file: linking videos to their
-                // corresponding
+                // Handle the data from the text file: linking videos to their corresponding
                 // Facebook URLs.
                 int startPosition = 0;
                 int endPosition = 0;
@@ -312,14 +306,11 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                     mUrlMap.put(values[0], refine(values[1]));
                 }
 
-                // Increase gotBothVideoIDAndLinkUrl, indicating that one of the
-                // two threads is done
+                // Increase gotBothVideoIDAndLinkUrl, indicating that one of the two threads is done
                 mGotBothVideoIdsAndLinkUrls++;
 
-                // If both threads are done, call new method to get any video
-                // that does not get
-                // linked to a Facebook URL and link it to its respective
-                // YouTube URL.
+                // If both threads are done, call new method to get any video that does not get
+                // linked to a Facebook URL and link it to its respective YouTube URL.
                 if (mGotBothVideoIdsAndLinkUrls == 2)
                     linkVideoIdsToYoutubeUrls();
             }
@@ -347,9 +338,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
             }
         }
 
-        // After completing with mLinkFromVideoIDToURL, we update
-        // ShareActionProvider with the link
-        // for currently playing video right away.
+        // After completing with mLinkFromVideoIDToURL, we update {@link ShareActionProvider} with
+        // the link for currently playing video right away.
         final String videoId = mVideoIds.get(mCurrentVideoNumber);
         updateShareActionProvider(mUrlMap.get(videoId));
     }
@@ -419,15 +409,13 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     @Override
     public void
             onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
-        // If successfully initialize YouTube player, store that player in a
-        // global mYouTubePlayer.
+        // If successfully initialize YouTube player, store that player in a global mYouTubePlayer.
         // Set up listeners for the player.
         mYouTubePlayer = player;
         mYouTubePlayer.setPlaylistEventListener(this);
         mYouTubePlayer.setPlayerStateChangeListener(this);
 
-        // If the playlist is not restored, we have load it into the YouTube
-        // player.
+        // If the playlist is not restored, we have load it into the YouTube player.
         if (!wasRestored)
             mYouTubePlayer.loadPlaylist(YOUTUBE_PLAYLIST_ID, mCurrentVideoNumber,
                     mCurrentTimeInVideo);
@@ -503,8 +491,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RECOVERY_DIALOG_REQUEST) {
-            // Retry initialization if user performed a recovery action and
-            // there is network available.
+            // Retry initialization if user performed a recovery action and there is network
+            // available.
             ((YouTubePlayerView) findViewById(R.id.youtube_view)).initialize(
                     DeveloperKey.DEVELOPER_KEY, this);
         }
