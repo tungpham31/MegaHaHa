@@ -67,26 +67,25 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private List<String> mVideoTitles = new ArrayList<String>();
 
     /**
-     * A variable to determine whether both threads handling video id and link URL have finished.
-     * When the value is 2, it means both threads are done
+     * A variable to count the number of pending tasks.
      */
-    private int mGotBothVideoIdsAndLinkUrls = 0;
-
-    /**
-     * Keep track of position of the first video played.
-     */
-    private int mFirstVideoNumber = 0;
+    private int mPendingTasks;
 
     /**
      * Keep track of position of the current video playing.
      */
-    private int mCurrentVideoNumber = 0;
+    private int mCurrentVideoNumber;
 
     /**
      * Keep track of current time in playing video. Let user start video where they left off
      * previous time.
      */
-    private int mCurrentTimeInVideo = 0;
+    private int mCurrentTimeInVideo;
+
+    /**
+     * Keep track of position of the first video played.
+     */
+    private int mFirstVideoNumber;
 
     /**
      * The share menu item.
@@ -106,7 +105,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main);
@@ -119,19 +118,15 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         final SharedPreferences prefs = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         mPrefEditor = prefs.edit();
 
-        // Get current video and current time playing from Shared Preference.
+        // Get current video and current time playing from {@link SharedPreferences}.
         mCurrentVideoNumber = prefs.getInt("mCurrentVideoNumber", 0);
         mCurrentTimeInVideo = prefs.getInt("mCurrentTimeInVideo", 0);
         if (mCurrentTimeInVideo < 0) {
             mCurrentTimeInVideo = 0;
         }
 
-        // Get playlist information.
-        mFirstVideoNumber = mCurrentVideoNumber;
-        getPlaylistInformation();
-
-        // Get URL for each video id.
-        getUrlsForVideos();
+        // Support going back up to 5 videos.
+        mFirstVideoNumber = Math.max(0, mCurrentVideoNumber - 5);
     }
 
     private boolean isLandscape() {
@@ -139,8 +134,23 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    protected void onStart() {
+        super.onStart();
+
+        if (mPendingTasks == 0) {
+            mPendingTasks = 2;
+
+            // Get playlist information.
+            getPlaylistInformation();
+
+            // Get URL for each video id.
+            getUrlsForVideos();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
 
         // Save position of current video and current time in it.
         mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
@@ -151,7 +161,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     }
 
     @Override
-    public void onDestroy() {
+    protected void onDestroy() {
         if (mYouTubePlayer != null) {
             mYouTubePlayer.setPlaylistEventListener(this);
             mYouTubePlayer.setPlayerStateChangeListener(this);
@@ -198,6 +208,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
             }
 
             protected void onPostExecute(String result) {
+                mPendingTasks--;
+
                 if (TextUtils.isEmpty(result)) {
                     return;
                 }
@@ -207,13 +219,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                 getVideoTitlesFromPlaylistData(result);
                 getVideoIdsFromPlaylistData(result);
 
-                // Increase mGotBothVideoIdsAndLinkUrls, indicating that one of the two threads
-                // is done.
-                mGotBothVideoIdsAndLinkUrls++;
-
                 // If both threads are done, call new method to get any video that does not get
                 // linked to a Facebook URL and link it to its respective YouTube URL.
-                if (mGotBothVideoIdsAndLinkUrls == 2) {
+                if (mPendingTasks == 0) {
                     linkVideoIdsToYoutubeUrls();
                 }
             }
@@ -297,6 +305,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
             @Override
             protected void onPostExecute(String result) {
+                mPendingTasks--;
+
                 if (TextUtils.isEmpty(result)) {
                     return;
                 }
@@ -313,12 +323,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                     mUrlMap.put(values[0], refine(values[1]));
                 }
 
-                // Increase gotBothVideoIDAndLinkUrl, indicating that one of the two threads is done
-                mGotBothVideoIdsAndLinkUrls++;
-
                 // If both threads are done, call new method to get any video that does not get
                 // linked to a Facebook URL and link it to its respective YouTube URL.
-                if (mGotBothVideoIdsAndLinkUrls >= 2) {
+                if (mPendingTasks == 0) {
                     linkVideoIdsToYoutubeUrls();
                 }
             }
