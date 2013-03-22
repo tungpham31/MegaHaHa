@@ -340,8 +340,10 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         // After completing with mLinkFromVideoIDToURL, we update {@link ShareActionProvider} with
         // the link for currently playing video right away.
-        final String videoId = mVideoIds.get(mCurrentVideoNumber);
-        updateShareActionProvider(mUrlMap.get(videoId));
+        if (mCurrentVideoNumber < mVideoIds.size()) {
+            final String videoId = mVideoIds.get(mCurrentVideoNumber);
+            updateShareActionProvider(mUrlMap.get(videoId));
+        }
     }
 
     @Override
