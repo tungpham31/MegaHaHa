@@ -50,6 +50,11 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private static final int RECOVERY_DIALOG_REQUEST = 1;
 
     /**
+     * A list of video titles in the same order as in playlist.
+     */
+    private List<String> mVideoTitles = new ArrayList<String>();
+
+    /**
      * Keep a list of video ids in the same order as in the playlist. This list is for later
      * reference because YouTube player does not support method to get what video is currently
      * played.
@@ -60,11 +65,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
      * A map from a video id to its corresponding URL (either Facebook URL or YouTube URL).
      */
     private Map<String, String> mUrlMap = new HashMap<String, String>();
-
-    /**
-     * A list of video titles in the same order as in playlist.
-     */
-    private List<String> mVideoTitles = new ArrayList<String>();
 
     /**
      * A variable to count the number of pending tasks.
@@ -139,6 +139,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         if (mPendingTasks == 0) {
             mPendingTasks = 2;
+
+            mVideoTitles.clear();
+            mVideoIds.clear();
 
             // Get playlist information.
             getPlaylistInformation();
