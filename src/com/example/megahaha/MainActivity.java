@@ -248,7 +248,11 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         }
 
         mVideoTitles.remove(0); // the first title is the title of the playlist, we don't need it.
-        updateTitle();
+
+        final int delta = mCurrentVideoNumber - mFirstVideoNumber;
+        if (0 <= delta && delta < mVideoIds.size()) {
+            updateTitle(mVideoIds.get(delta));
+        }
     }
 
     /**
@@ -360,8 +364,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         // currently playing video right away.
         final int delta = mCurrentVideoNumber - mFirstVideoNumber;
         if (0 <= delta && delta < mVideoIds.size()) {
-            final String videoId = mVideoIds.get(delta);
-            updateShareActionProvider(mUrlMap.get(videoId));
+            updateShareAction(mVideoIds.get(delta));
         }
     }
 
@@ -396,35 +399,28 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     /**
      * Update the title of the video.
      */
-    private void updateTitle() {
-        // Set title of the video.
-        final int delta = mCurrentVideoNumber - mFirstVideoNumber;
-        if (0 <= delta && delta < mVideoTitles.size()) {
-            final TextView videoTitle = (TextView) findViewById(R.id.video_title);
+    private void updateTitle(String videoId) {
+        final int position = mVideoIds.indexOf(videoId);
+        if (0 <= position) {
             if (isLandscape()) {
-                videoTitle.setVisibility(View.GONE);
-                setTitle(mVideoTitles.get(delta));
+                setTitle(mVideoTitles.get(position));
             } else {
-                videoTitle.setText(mVideoTitles.get(delta));
+                final TextView videoTitle = (TextView) findViewById(R.id.video_title);
+                videoTitle.setText(mVideoTitles.get(position));
             }
         }
     }
 
     /**
-     * Update the newest link for the currently playing video
-     * @param link
-     *            : the url of the currently playing video. This url needs to be update so that
-     *            users can share it if they want to.
+     * Update the share action.
      */
-    private void updateShareActionProvider(String link) {
-        final Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.putExtra(Intent.EXTRA_TEXT, link);
-        intent.setType("text/plain");
-        if (mShareMenuItem != null) {
-            ShareCompat.configureMenuItem(
-                    mShareMenuItem,
-                    ShareCompat.IntentBuilder.from(MainActivity.this).setText(link)
-                            .setType("text/plain"));
+    private void updateShareAction(String videoId) {
+        final String link = mUrlMap.get(videoId);
+        if (!TextUtils.isEmpty(link)) {
+            if (mShareMenuItem != null) {
+                ShareCompat.configureMenuItem(mShareMenuItem, ShareCompat.IntentBuilder.from(this)
+                        .setText(link).setType("text/plain"));
+            }
         }
     }
 
@@ -460,14 +456,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
     @Override
     public void onLoading() {
-        updateTitle();
-
-        // Update the link to share for this currently playing video.
-        final int delta = mCurrentVideoNumber - mFirstVideoNumber;
-        if (0 <= delta && delta < mVideoIds.size()) {
-            final String videoId = mVideoIds.get(delta);
-            updateShareActionProvider(mUrlMap.get(videoId));
-        }
+        // Do nothing.
     }
 
     @Override
@@ -478,6 +467,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     @Override
     public void onError(ErrorReason error) {
         if (ErrorReason.UNEXPECTED_SERVICE_DISCONNECTION.equals(error)) {
+            mYouTubePlayer = null;
         }
     }
 
@@ -488,6 +478,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         if (isLandscape() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             mYouTubeView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         }
+
+        updateTitle(videoId);
+        updateShareAction(videoId);
     }
 
     @Override
