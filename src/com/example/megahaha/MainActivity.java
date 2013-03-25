@@ -72,6 +72,11 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private int mPendingTasks;
 
     /**
+     * A variable to keep track of the current video id.
+     */
+    private String mCurrentVideoId;
+
+    /**
      * Keep track of position of the current video playing.
      */
     private int mCurrentVideoNumber;
@@ -249,9 +254,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         mVideoTitles.remove(0); // the first title is the title of the playlist, we don't need it.
 
-        final int delta = mCurrentVideoNumber - mFirstVideoNumber;
-        if (0 <= delta && delta < mVideoIds.size()) {
-            updateTitle(mVideoIds.get(delta));
+        if (!TextUtils.isEmpty(mCurrentVideoId)) {
+            updateTitle(mCurrentVideoId);
         }
     }
 
@@ -362,9 +366,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         // After completing with mUrlMap, we update {@link ShareActionProvider} with the link for
         // currently playing video right away.
-        final int delta = mCurrentVideoNumber - mFirstVideoNumber;
-        if (0 <= delta && delta < mVideoIds.size()) {
-            updateShareAction(mVideoIds.get(delta));
+        if (!TextUtils.isEmpty(mCurrentVideoId)) {
+            updateShareAction(mCurrentVideoId);
         }
     }
 
@@ -474,6 +477,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     @Override
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void onLoaded(String videoId) {
+        mCurrentVideoId = videoId;
+
         // Enter low profile mode.
         if (isLandscape() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             mYouTubeView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
