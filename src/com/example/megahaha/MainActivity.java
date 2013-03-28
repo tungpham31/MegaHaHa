@@ -43,7 +43,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private static final String YOUTUBE_PLAYLIST_ID = "PLSgXk6DxD9Qt5NB5GhfhU0apqjkr7pMyC";
 
     private static final String URL_TO_GET_PLAYLIST_INFORMATION =
-            "https://gdata.youtube.com/feeds/api/playlists/PLSgXk6DxD9Qt5NB5GhfhU0apqjkr7pMyC?v=2&max-results=50&start-index=";
+            "https://gdata.youtube.com/feeds/api/playlists/" + YOUTUBE_PLAYLIST_ID + "?v=2&max-results=50&start-index=";
 
     private static final String DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS =
             "https://docs.google.com/document/d/1oj2RZfVzmjMJZ9h_yHictZO9KFbBcfb7y1poFvueFiQ/edit?usp=sharing";
