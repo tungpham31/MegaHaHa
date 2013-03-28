@@ -46,7 +46,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
             "https://gdata.youtube.com/feeds/api/playlists/" + YOUTUBE_PLAYLIST_ID + "?v=2&max-results=50&start-index=";
 
     private static final String DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS =
-            "https://docs.google.com/document/d/1oj2RZfVzmjMJZ9h_yHictZO9KFbBcfb7y1poFvueFiQ/edit?usp=sharing";
+            "https://docs.google.com/document/d/14wVSOe2vmQ4LDgqI2ZvlGtHXFCxTlGFRLlrflXa3U7I/edit?usp=sharing";
 
     private static final int RECOVERY_DIALOG_REQUEST = 1;
 
