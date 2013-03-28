@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">MegaHaHa</string>
+    <string name="app_name">AwwStream</string>
     <string name="error_player">There is an error intinializing YouTubePlayer</string>
     <string name="like_button">Like</string>
     <string name="dislike_button">Dislike</string>
