@@ -1,4 +1,4 @@
-package com.example.megahaha;
+package com.awwstream.android;
 
 import android.annotation.TargetApi;
 import android.content.Intent;

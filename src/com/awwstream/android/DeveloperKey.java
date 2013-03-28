@@ -1,4 +1,4 @@
-package com.example.megahaha;
+package com.awwstream.android;
 
 /**
  * Static container class for holding a reference to your YouTube Developer Key.
