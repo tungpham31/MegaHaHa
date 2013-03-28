@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public final class MainActivity extends YouTubeBaseActivity implements OnInitializedListener,
         PlaylistEventListener, PlayerStateChangeListener {
-    private static final String YOUTUBE_PLAYLIST_ID = "PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY";
+    private static final String YOUTUBE_PLAYLIST_ID = "PLSgXk6DxD9Qt5NB5GhfhU0apqjkr7pMyC";
 
     private static final String URL_TO_GET_PLAYLIST_INFORMATION =
             "https://gdata.youtube.com/feeds/api/playlists/PL4MW09z0LVvXN9Uaqg2IS0XN64CUIjfvY?v=2&max-results=50&start-index=";
