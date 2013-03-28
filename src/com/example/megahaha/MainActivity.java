@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ShareCompat;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -82,12 +83,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private int mCurrentVideoNumber;
 
     /**
-     * Keep track of current time in playing video. Let user start video where they left off
-     * previous time.
-     */
-    private int mCurrentTimeInVideo;
-
-    /**
      * Keep track of position of the first video played.
      */
     private int mFirstVideoNumber;
@@ -125,10 +120,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         // Get current video and current time playing from {@link SharedPreferences}.
         mCurrentVideoNumber = prefs.getInt("mCurrentVideoNumber", 0);
-        mCurrentTimeInVideo = prefs.getInt("mCurrentTimeInVideo", 0);
-        if (mCurrentTimeInVideo < 0) {
-            mCurrentTimeInVideo = 0;
-        }
 
         // Support going back up to 5 videos.
         mFirstVideoNumber = Math.max(0, mCurrentVideoNumber - 5);
@@ -179,6 +170,16 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         super.onDestroy();
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            moveTaskToBack(true);
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
     /**
      * Opens connection to an URL containing information about the playlist. Read video titles and
      * put into mVideoTitles. Read videos' id and put into mVideoIds
@@ -227,6 +228,10 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                 getVideoTitlesFromPlaylistData(result);
                 getVideoIdsFromPlaylistData(result);
 
+                if (!TextUtils.isEmpty(mCurrentVideoId)) {
+                    updateTitle(mCurrentVideoId);
+                }
+                
                 // If both threads are done, call new method to get any video that does not get
                 // linked to a Facebook URL and link it to its respective YouTube URL.
                 if (mPendingTasks == 0) {
@@ -253,10 +258,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         }
 
         mVideoTitles.remove(0); // the first title is the title of the playlist, we don't need it.
-
-        if (!TextUtils.isEmpty(mCurrentVideoId)) {
-            updateTitle(mCurrentVideoId);
-        }
     }
 
     /**
@@ -438,8 +439,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         // If the playlist is not restored, we have load it into the YouTube player.
         if (!wasRestored)
-            mYouTubePlayer.loadPlaylist(YOUTUBE_PLAYLIST_ID, mCurrentVideoNumber,
-                    mCurrentTimeInVideo);
+            mYouTubePlayer.loadPlaylist(YOUTUBE_PLAYLIST_ID, mCurrentVideoNumber, 0);
     }
 
     @Override
