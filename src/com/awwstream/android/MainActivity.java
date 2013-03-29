@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ShareCompat;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -168,16 +167,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         }
 
         super.onDestroy();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            moveTaskToBack(true);
-            return true;
-        }
-
-        return super.onKeyDown(keyCode, event);
     }
 
     /**
