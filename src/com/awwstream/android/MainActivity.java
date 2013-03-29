@@ -152,9 +152,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         // Save position of current video and current time in it.
         mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
-        if (mYouTubePlayer != null) {
-            mPrefEditor.putInt("mCurrentTimeInVideo", mYouTubePlayer.getCurrentTimeMillis());
-        }
         mPrefEditor.commit();
     }
 
