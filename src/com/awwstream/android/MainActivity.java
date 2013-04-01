@@ -381,6 +381,10 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                 Toast.makeText(this, getString(R.string.dislike_button_message), Toast.LENGTH_SHORT)
                         .show();
                 return true;
+            case R.id.menu_next:
+                if (mYouTubePlayer != null) {
+                    mYouTubePlayer.next();
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -466,7 +470,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         mCurrentVideoId = videoId;
 
         // Enter low profile mode.
-        if (isLandscape() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             mYouTubeView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         }
 

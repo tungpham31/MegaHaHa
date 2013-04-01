@@ -7,11 +7,18 @@
         android:title="Share"/>
     <item
         android:id="@+id/menu_like"
-        android:showAsAction="ifRoom|withText"
+        android:icon="@drawable/ic_action_like"
+        android:showAsAction="ifRoom"
         android:title="@string/like_button"/>
     <item
         android:id="@+id/menu_dislike"
-        android:showAsAction="ifRoom|withText"
+        android:icon="@drawable/ic_action_dislike"
+        android:showAsAction="ifRoom"
         android:title="@string/dislike_button"/>
+    <item
+        android:id="@+id/menu_next"
+        android:icon="@drawable/ic_action_next"
+        android:showAsAction="ifRoom"
+        android:title="@string/next_button"/>
 
 </menu>
