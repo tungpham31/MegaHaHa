@@ -100,7 +100,6 @@ public final class MainActivity extends FragmentActivity implements OnInitialize
     /**
      * YouTube player.
      */
-    private YouTubePlayerSupportFragment mYouTubePlayerFragment;
     private YouTubePlayer mYouTubePlayer;
 
     /**
@@ -131,11 +130,9 @@ public final class MainActivity extends FragmentActivity implements OnInitialize
             getActionBar().setCustomView(view);
         }
 
-        // Initialize {@link YouTubePlayerView}.
-        mYouTubePlayerFragment = YouTubePlayerSupportFragment.newInstance();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.content_frame, mYouTubePlayerFragment).commit();
-        mYouTubePlayerFragment.initialize(DeveloperKey.DEVELOPER_KEY, this);
+        // Initialize {@link YouTubePlayerSupportFragment}.
+        ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
+                R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
 
         // Get {@link SharedPreferences}.
         final SharedPreferences prefs = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
@@ -528,7 +525,8 @@ public final class MainActivity extends FragmentActivity implements OnInitialize
         if (requestCode == RECOVERY_DIALOG_REQUEST) {
             // Retry initialization if user performed a recovery action and there is network
             // available.
-            mYouTubePlayerFragment.initialize(DeveloperKey.DEVELOPER_KEY, this);
+            ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
+                    R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
         }
     }
 }
