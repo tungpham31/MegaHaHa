@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
@@ -128,6 +130,10 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         // Support going back up to 5 videos.
         mFirstVideoNumber = Math.max(0, mCurrentVideoNumber - 5);
+    }
+
+    private boolean isLandscape() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     @Override
@@ -402,7 +408,12 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private void updateTitle(String videoId) {
         final int position = mVideoIds.indexOf(videoId);
         if (0 <= position) {
-            setTitle(mVideoTitles.get(position));
+            if (isLandscape()) {
+                setTitle(mVideoTitles.get(position));
+            } else {
+                final TextView videoTitle = (TextView) findViewById(R.id.video_title);
+                videoTitle.setText(mVideoTitles.get(position));
+            }
         }
     }
 
