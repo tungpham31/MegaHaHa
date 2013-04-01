@@ -7,6 +7,7 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ShareCompat;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -15,7 +16,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.youtube.player.YouTubeBaseActivity;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
@@ -23,7 +23,7 @@ import com.google.android.youtube.player.YouTubePlayer.OnInitializedListener;
 import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
-import com.google.android.youtube.player.YouTubePlayerView;
+import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.tapjoy.TapjoyConnect;
 
 import java.io.BufferedReader;
@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * The main activity.
  */
-public final class MainActivity extends YouTubeBaseActivity implements OnInitializedListener,
+public final class MainActivity extends FragmentActivity implements OnInitializedListener,
         PlaylistEventListener, PlayerStateChangeListener {
     private static final String YOUTUBE_PLAYLIST_ID = "PLSgXk6DxD9Qt5NB5GhfhU0apqjkr7pMyC";
 
@@ -100,7 +100,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     /**
      * YouTube player.
      */
-    private YouTubePlayerView mYouTubeView;
+    private YouTubePlayerSupportFragment mYouTubePlayerFragment;
     private YouTubePlayer mYouTubePlayer;
 
     /**
@@ -132,8 +132,10 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         }
 
         // Initialize {@link YouTubePlayerView}.
-        mYouTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
-        mYouTubeView.initialize(DeveloperKey.DEVELOPER_KEY, this);
+        mYouTubePlayerFragment = YouTubePlayerSupportFragment.newInstance();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.content_frame, mYouTubePlayerFragment).commit();
+        mYouTubePlayerFragment.initialize(DeveloperKey.DEVELOPER_KEY, this);
 
         // Get {@link SharedPreferences}.
         final SharedPreferences prefs = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
@@ -493,7 +495,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         // Enter low profile mode.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            mYouTubeView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+            findViewById(R.id.content_frame).setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         }
 
         updateTitle(videoId);
@@ -526,8 +528,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         if (requestCode == RECOVERY_DIALOG_REQUEST) {
             // Retry initialization if user performed a recovery action and there is network
             // available.
-            ((YouTubePlayerView) findViewById(R.id.youtube_view)).initialize(
-                    DeveloperKey.DEVELOPER_KEY, this);
+            mYouTubePlayerFragment.initialize(DeveloperKey.DEVELOPER_KEY, this);
         }
     }
 }
