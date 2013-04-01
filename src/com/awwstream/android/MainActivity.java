@@ -23,6 +23,7 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerView;
+import com.tapjoy.TapjoyConnect;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -107,6 +108,10 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Connect to Tapjoy.
+        TapjoyConnect.requestTapjoyConnect(getApplicationContext(),
+                "ea839ae2-ed5a-4fbb-ad3f-d5dbf7092c50", "yduuUm38cteYT4lhsiwb");
 
         setContentView(R.layout.main);
 
