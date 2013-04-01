@@ -7,15 +7,15 @@ import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.ShareCompat;
 import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.ShareActionProvider;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
@@ -37,7 +37,7 @@ import java.util.Map;
 /**
  * The main activity.
  */
-public final class MainActivity extends FragmentActivity implements OnInitializedListener,
+public final class MainActivity extends SherlockFragmentActivity implements OnInitializedListener,
         PlaylistEventListener, PlayerStateChangeListener {
     private static final String YOUTUBE_PLAYLIST_ID = "PLSgXk6DxD9Qt5NB5GhfhU0apqjkr7pMyC";
 
@@ -113,7 +113,6 @@ public final class MainActivity extends FragmentActivity implements OnInitialize
     private TextView mTitle;
 
     @Override
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -127,7 +126,7 @@ public final class MainActivity extends FragmentActivity implements OnInitialize
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             final View view = getLayoutInflater().inflate(R.layout.title, null);
             mTitle = (TextView) view.findViewById(R.id.title);
-            getActionBar().setCustomView(view);
+            getSupportActionBar().setCustomView(view);
         }
 
         // Initialize {@link YouTubePlayerSupportFragment}.
@@ -378,7 +377,7 @@ public final class MainActivity extends FragmentActivity implements OnInitialize
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getSupportMenuInflater().inflate(R.menu.main, menu);
 
         // Locate MenuItem with ShareActionProvider.
         mShareMenuItem = menu.findItem(R.id.menu_item_share);
@@ -432,8 +431,10 @@ public final class MainActivity extends FragmentActivity implements OnInitialize
         final String link = mUrlMap.get(videoId);
         if (!TextUtils.isEmpty(link)) {
             if (mShareMenuItem != null) {
-                ShareCompat.configureMenuItem(mShareMenuItem, ShareCompat.IntentBuilder.from(this)
-                        .setText(link).setType("text/plain"));
+                final Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("text/plain");
+                intent.putExtra(Intent.EXTRA_TEXT, link);
+                ((ShareActionProvider) mShareMenuItem.getActionProvider()).setShareIntent(intent);
             }
         }
     }
