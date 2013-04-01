@@ -382,8 +382,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                         .show();
                 return true;
             case R.id.menu_next:
-                if (mYouTubePlayer != null) {
+                if (mYouTubePlayer != null && mYouTubePlayer.hasNext()) {
                     mYouTubePlayer.next();
+                    mCurrentVideoNumber++;
                 }
             default:
                 return super.onOptionsItemSelected(item);
