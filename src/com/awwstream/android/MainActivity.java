@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -104,10 +103,18 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private YouTubePlayerView mYouTubeView;
     private YouTubePlayer mYouTubePlayer;
 
+    /**
+     * Timer for skip button.
+     */
     private long mLastSkipTimeMillis;
 
+    /**
+     * Title of the current video.
+     */
+    private TextView mTitle;
+
     @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -116,6 +123,13 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                 "ea839ae2-ed5a-4fbb-ad3f-d5dbf7092c50", "yduuUm38cteYT4lhsiwb");
 
         setContentView(R.layout.main);
+
+        // Initialize {@link ActionBar}.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            final View view = getLayoutInflater().inflate(R.layout.title, null);
+            mTitle = (TextView) view.findViewById(R.id.title);
+            getActionBar().setCustomView(view);
+        }
 
         // Initialize {@link YouTubePlayerView}.
         mYouTubeView = (YouTubePlayerView) findViewById(R.id.youtube_view);
@@ -130,10 +144,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
 
         // Support going back up to 5 videos.
         mFirstVideoNumber = Math.max(0, mCurrentVideoNumber - 5);
-    }
-
-    private boolean isLandscape() {
-        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     @Override
@@ -349,7 +359,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     /**
      * After we get Facebook URLs and link them to their corresponding video ids, there are some
      * video id left that does not link to any Facebook URLs. We simply link those to their
-     * corresponding YouTube URLs
+     * corresponding YouTube URLs.
      */
     private void linkVideoIdsToYoutubeUrls() {
         // Handle the rest video ids which does not match to a Facebook URL.
@@ -391,12 +401,12 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                 return true;
             case R.id.menu_next:
                 if (mYouTubePlayer != null && mYouTubePlayer.hasNext()
-                        && System.currentTimeMillis() - mLastSkipTimeMillis >= 1000) {
+                        && System.currentTimeMillis() - mLastSkipTimeMillis >= 3000) {
                     mYouTubePlayer.next();
+                    mLastSkipTimeMillis = System.currentTimeMillis();
                     Toast.makeText(this, getString(R.string.next_button_message),
                             Toast.LENGTH_SHORT).show();
                 }
-                mLastSkipTimeMillis = System.currentTimeMillis();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -408,11 +418,10 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private void updateTitle(String videoId) {
         final int position = mVideoIds.indexOf(videoId);
         if (0 <= position) {
-            if (isLandscape()) {
-                setTitle(mVideoTitles.get(position));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                mTitle.setText(mVideoTitles.get(position));
             } else {
-                final TextView videoTitle = (TextView) findViewById(R.id.video_title);
-                videoTitle.setText(mVideoTitles.get(position));
+                setTitle(mVideoTitles.get(position));
             }
         }
     }
