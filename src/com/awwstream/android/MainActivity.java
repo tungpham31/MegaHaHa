@@ -124,10 +124,6 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         mFirstVideoNumber = Math.max(0, mCurrentVideoNumber - 5);
     }
 
-    private boolean isLandscape() {
-        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -397,12 +393,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private void updateTitle(String videoId) {
         final int position = mVideoIds.indexOf(videoId);
         if (0 <= position) {
-            if (isLandscape()) {
-                setTitle(mVideoTitles.get(position));
-            } else {
-                final TextView videoTitle = (TextView) findViewById(R.id.video_title);
-                videoTitle.setText(mVideoTitles.get(position));
-            }
+            setTitle(mVideoTitles.get(position));
         }
     }
 
