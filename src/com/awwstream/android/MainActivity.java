@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,7 +12,6 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubeBaseActivity;
@@ -419,8 +417,9 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
         mYouTubePlayer.setPlayerStateChangeListener(this);
 
         // If the playlist is not restored, we have load it into the YouTube player.
-        if (!wasRestored)
+        if (!wasRestored) {
             mYouTubePlayer.loadPlaylist(YOUTUBE_PLAYLIST_ID, mCurrentVideoNumber, 0);
+        }
     }
 
     @Override
