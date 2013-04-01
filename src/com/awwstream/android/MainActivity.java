@@ -399,7 +399,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
                 return true;
             case R.id.menu_next:
                 if (mYouTubePlayer != null && mYouTubePlayer.hasNext()
-                        && System.currentTimeMillis() - mLastSkipTimeMillis >= 3000) {
+                        && System.currentTimeMillis() - mLastSkipTimeMillis >= 2000) {
                     mYouTubePlayer.next();
                     mLastSkipTimeMillis = System.currentTimeMillis();
                     Toast.makeText(this, getString(R.string.next_button_message),
