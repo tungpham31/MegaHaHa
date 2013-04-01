@@ -9,5 +9,6 @@
     <string name="like_button_message">You like this video</string>
     <string name="dislike_button_message">You dislike this video</string>
     <string name="next_button">Next</string>
-
+    <string name="next_button_message">You skip this video</string>
+    
 </resources>

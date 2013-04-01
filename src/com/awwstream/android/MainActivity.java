@@ -40,7 +40,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
     private static final String YOUTUBE_PLAYLIST_ID = "PLSgXk6DxD9Qt5NB5GhfhU0apqjkr7pMyC";
 
     private static final String URL_TO_GET_PLAYLIST_INFORMATION =
-            "https://gdata.youtube.com/feeds/api/playlists/" + YOUTUBE_PLAYLIST_ID + "?v=2&max-results=50&start-index=";
+            "https://gdata.youtube.com/feeds/api/playlists/" + YOUTUBE_PLAYLIST_ID
+                    + "?v=2&max-results=50&start-index=";
 
     private static final String DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS =
             "https://docs.google.com/document/d/14wVSOe2vmQ4LDgqI2ZvlGtHXFCxTlGFRLlrflXa3U7I/edit?usp=sharing";
@@ -99,6 +100,8 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
      */
     private YouTubePlayerView mYouTubeView;
     private YouTubePlayer mYouTubePlayer;
+
+    private long mLastSkipTimeMillis;
 
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -211,7 +214,7 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                 if (!TextUtils.isEmpty(mCurrentVideoId)) {
                     updateTitle(mCurrentVideoId);
                 }
-                
+
                 // If both threads are done, call new method to get any video that does not get
                 // linked to a Facebook URL and link it to its respective YouTube URL.
                 if (mPendingTasks == 0) {
@@ -376,9 +379,13 @@ public final class MainActivity extends YouTubeBaseActivity implements OnInitial
                         .show();
                 return true;
             case R.id.menu_next:
-                if (mYouTubePlayer != null && mYouTubePlayer.hasNext()) {
+                if (mYouTubePlayer != null && mYouTubePlayer.hasNext()
+                        && System.currentTimeMillis() - mLastSkipTimeMillis >= 1000) {
                     mYouTubePlayer.next();
+                    Toast.makeText(this, getString(R.string.next_button_message),
+                            Toast.LENGTH_SHORT).show();
                 }
+                mLastSkipTimeMillis = System.currentTimeMillis();
             default:
                 return super.onOptionsItemSelected(item);
         }
