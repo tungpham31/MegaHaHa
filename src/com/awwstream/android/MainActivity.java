@@ -16,6 +16,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.widget.ShareActionProvider;
+import com.actionbarsherlock.widget.ShareActionProvider.OnShareTargetSelectedListener;
+import com.flurry.android.FlurryAgent;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
@@ -90,7 +92,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
     /**
      * The share menu item.
      */
-    private MenuItem mShareMenuItem;
+    private ShareActionProvider mShareActionProvider;
 
     /**
      * Shared Preferences to save variables.
@@ -148,6 +150,8 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
     protected void onStart() {
         super.onStart();
 
+        FlurryAgent.onStartSession(this, "4QVGFH2RQW3ZM5X4W2C3");
+
         if (mPendingTasks == 0) {
             mPendingTasks = 2;
 
@@ -165,6 +169,8 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
     @Override
     protected void onStop() {
         super.onStop();
+
+        FlurryAgent.onEndSession(this);
 
         // Save position of current video and current time in it.
         mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
@@ -380,7 +386,8 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
         getSupportMenuInflater().inflate(R.menu.main, menu);
 
         // Locate MenuItem with ShareActionProvider.
-        mShareMenuItem = menu.findItem(R.id.menu_item_share);
+        mShareActionProvider =
+                (ShareActionProvider) menu.findItem(R.id.menu_item_share).getActionProvider();
 
         return true;
     }
@@ -392,10 +399,12 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
             case R.id.menu_like:
                 Toast.makeText(this, getString(R.string.like_button_message), Toast.LENGTH_SHORT)
                         .show();
+                FlurryAgent.logEvent("Like");
                 return true;
             case R.id.menu_dislike:
                 Toast.makeText(this, getString(R.string.dislike_button_message), Toast.LENGTH_SHORT)
                         .show();
+                FlurryAgent.logEvent("Disike");
                 return true;
             case R.id.menu_next:
                 if (mYouTubePlayer != null && mYouTubePlayer.hasNext()
@@ -404,6 +413,7 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
                     mLastSkipTimeMillis = System.currentTimeMillis();
                     Toast.makeText(this, getString(R.string.next_button_message),
                             Toast.LENGTH_SHORT).show();
+                    FlurryAgent.logEvent("Next");
                 }
             default:
                 return super.onOptionsItemSelected(item);
@@ -429,13 +439,27 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
      */
     private void updateShareAction(String videoId) {
         final String link = mUrlMap.get(videoId);
-        if (!TextUtils.isEmpty(link)) {
-            if (mShareMenuItem != null) {
-                final Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, link);
-                ((ShareActionProvider) mShareMenuItem.getActionProvider()).setShareIntent(intent);
-            }
+        if (mShareActionProvider != null && !TextUtils.isEmpty(link)) {
+            final Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, link);
+            mShareActionProvider.setShareIntent(intent);
+            mShareActionProvider
+                    .setOnShareTargetSelectedListener(new OnShareTargetSelectedListener() {
+                        @Override
+                        public boolean onShareTargetSelected(ShareActionProvider source,
+                                Intent intent) {
+                            if (!TextUtils.isEmpty(intent.getPackage())) {
+                                FlurryAgent.logEvent("Share" + "-"
+                                        + intent.getComponent().getPackageName());
+                            } else {
+                                FlurryAgent.logEvent("Share");
+
+                            }
+
+                            return false;
+                        }
+                    });
         }
     }
 
