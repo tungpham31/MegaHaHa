@@ -1,12 +1,10 @@
 package com.awwstream.android;
 
 import android.app.Activity;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.TextView;
 
-import com.google.android.youtube.player.YouTubePlayerSupportFragment;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -24,19 +22,6 @@ public class HotActivity extends YouTubeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.main);
-
-        // Initialize {@link ActionBar}.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            final View view = getLayoutInflater().inflate(R.layout.title, null);
-            mTitle = (TextView) view.findViewById(R.id.title);
-            getSupportActionBar().setCustomView(view);
-        }
-
-        // Initialize {@link YouTubePlayerSupportFragment}.
-        ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
-                R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
-
         final ParseQuery query = new ParseQuery("Video");
         query.addDescendingOrder("score");
         query.findInBackground(new FindCallback() {
@@ -53,8 +38,22 @@ public class HotActivity extends YouTubeActivity {
     }
 
     private void loadVideo() {
+        if (mYouTubePlayer == null || mVideos == null || mVideos.isEmpty()) {
+            return;
+        }
+
         final ParseObject video = mVideos.get(mCurrentVideoNumber);
         mYouTubePlayer.loadVideo(video.getString("videoId"));
+    }
+
+    @Override
+    public void
+            onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
+        super.onInitializationSuccess(provider, player, wasRestored);
+
+        if (!wasRestored) {
+            loadVideo();
+        }
     }
 
     @Override

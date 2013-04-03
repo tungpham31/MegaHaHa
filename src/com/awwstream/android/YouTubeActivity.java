@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +25,8 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
+
+import net.simonvt.menudrawer.MenuDrawer;
 
 /**
  * The base {@link Activity}.
@@ -62,9 +65,55 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
      */
     private long mLastSkipTimeMillis;
 
+    /**
+     * The sliding {@link MenuDrawer}.
+     */
+    private MenuDrawer mMenuDrawer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.main);
+
+        // Initialize {@link MenuDrawer}.
+        mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.MENU_DRAG_WINDOW);
+        mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
+        mMenuDrawer.setMenuView(R.layout.menu_drawer);
+        findViewById(R.id.featured).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent intent = new Intent(YouTubeActivity.this, FeaturedActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        findViewById(R.id.hot).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent intent = new Intent(YouTubeActivity.this, HotActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        findViewById(R.id.new_button).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final Intent intent = new Intent(YouTubeActivity.this, NewActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        // Initialize {@link ActionBar}.
+        final View view = getLayoutInflater().inflate(R.layout.title, null);
+        mTitle = (TextView) view.findViewById(R.id.title);
+        getSupportActionBar().setCustomView(view);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // Initialize {@link YouTubePlayerSupportFragment}.
+        ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
+                R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
     }
 
     @Override
@@ -79,9 +128,17 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Inflate the menu; this adds items to the action bar if it is present.
         getSupportMenuInflater().inflate(R.menu.main, menu);
 
-        // Locate MenuItem with ShareActionProvider.
+        // Locate {@link MenuItem} with {@link ShareActionProvider}.
         mShareActionProvider =
                 (ShareActionProvider) menu.findItem(R.id.menu_item_share).getActionProvider();
+        mShareActionProvider.setOnShareTargetSelectedListener(new OnShareTargetSelectedListener() {
+            @Override
+            public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
+                FlurryAgent.logEvent("Share");
+
+                return false;
+            }
+        });
 
         return true;
     }
@@ -90,6 +147,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection.
         switch (item.getItemId()) {
+            case android.R.id.home:
+                if (mYouTubePlayer != null) {
+                    mYouTubePlayer.pause();
+                }
+                mMenuDrawer.openMenu();
+                return true;
             case R.id.menu_like:
                 if (!TextUtils.isEmpty(mCurrentVideoId)) {
                     Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
@@ -241,21 +304,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             intent.setType("text/plain");
             intent.putExtra(Intent.EXTRA_TEXT, link);
             mShareActionProvider.setShareIntent(intent);
-            mShareActionProvider
-                    .setOnShareTargetSelectedListener(new OnShareTargetSelectedListener() {
-                        @Override
-                        public boolean onShareTargetSelected(ShareActionProvider source,
-                                Intent intent) {
-                            if (!TextUtils.isEmpty(intent.getPackage())) {
-                                FlurryAgent.logEvent("Share" + "-"
-                                        + intent.getComponent().getPackageName());
-                            } else {
-                                FlurryAgent.logEvent("Share");
-                            }
-
-                            return false;
-                        }
-                    });
         }
     }
 }

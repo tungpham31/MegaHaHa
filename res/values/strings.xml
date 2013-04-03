@@ -2,8 +2,9 @@
 <resources>
 
     <string name="app_name">AwwStream</string>
-    <string name="app_name_hot">AwwStream HOT</string>
-    <string name="app_name_new">AwwStream NEW</string>
+    <string name="featured">Featured</string>
+    <string name="hot">Hot</string>
+    <string name="new_string">New</string>
     <string name="error_player">There is an error intinializing YouTubePlayer</string>
     <string name="like_button">Like</string>
     <string name="dislike_button">Dislike</string>

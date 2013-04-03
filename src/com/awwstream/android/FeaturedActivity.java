@@ -2,15 +2,11 @@ package com.awwstream.android;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.TextView;
 
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
-import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.tapjoy.TapjoyConnect;
 
 import java.io.BufferedReader;
@@ -73,19 +69,6 @@ public final class FeaturedActivity extends YouTubeActivity {
         // Connect to Tapjoy.
         TapjoyConnect.requestTapjoyConnect(getApplicationContext(),
                 "ea839ae2-ed5a-4fbb-ad3f-d5dbf7092c50", "yduuUm38cteYT4lhsiwb");
-
-        setContentView(R.layout.main);
-
-        // Initialize {@link ActionBar}.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            final View view = getLayoutInflater().inflate(R.layout.title, null);
-            mTitle = (TextView) view.findViewById(R.id.title);
-            getSupportActionBar().setCustomView(view);
-        }
-
-        // Initialize {@link YouTubePlayerSupportFragment}.
-        ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
-                R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
 
         // Get {@link SharedPreferences}.
         mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
@@ -339,11 +322,7 @@ public final class FeaturedActivity extends YouTubeActivity {
     protected void updateTitle(String videoId) {
         final int position = mVideoIds.indexOf(videoId);
         if (0 <= position) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                mTitle.setText(mVideoTitles.get(position));
-            } else {
-                setTitle(mVideoTitles.get(position));
-            }
+            mTitle.setText(mVideoTitles.get(position));
         }
     }
 

@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.flurry.android.FlurryAgent;
+
 /**
  * An UI-less {@link Activity} to share video.
  */
@@ -36,6 +38,7 @@ public class ShareActivity extends Activity {
         Utils.promoteVideo(videoId, title);
 
         Toast.makeText(this, R.string.share_message, Toast.LENGTH_SHORT).show();
+        FlurryAgent.logEvent("Promote");
         finish();
     }
 }
