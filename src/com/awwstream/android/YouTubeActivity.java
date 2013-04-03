@@ -80,6 +80,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.MENU_DRAG_WINDOW);
         mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
         mMenuDrawer.setMenuView(R.layout.menu_drawer);
+
         findViewById(R.id.featured).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -148,9 +149,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Handle item selection.
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (mYouTubePlayer != null) {
-                    mYouTubePlayer.pause();
-                }
                 mMenuDrawer.openMenu();
                 return true;
             case R.id.menu_like:
