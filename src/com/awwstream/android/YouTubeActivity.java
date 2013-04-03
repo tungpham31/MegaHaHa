@@ -91,11 +91,20 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Handle item selection.
         switch (item.getItemId()) {
             case R.id.menu_like:
+                if (!TextUtils.isEmpty(mCurrentVideoId)) {
+                    Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
+                }
+
                 Toast.makeText(this, getString(R.string.like_button_message), Toast.LENGTH_SHORT)
                         .show();
                 FlurryAgent.logEvent("Like");
                 return true;
             case R.id.menu_dislike:
+                if (mYouTubePlayer != null
+                        && System.currentTimeMillis() - mLastSkipTimeMillis >= 2000 && next()) {
+                    mLastSkipTimeMillis = System.currentTimeMillis();
+                }
+
                 Toast.makeText(this, getString(R.string.dislike_button_message), Toast.LENGTH_SHORT)
                         .show();
                 FlurryAgent.logEvent("Disike");
@@ -104,10 +113,10 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 if (mYouTubePlayer != null
                         && System.currentTimeMillis() - mLastSkipTimeMillis >= 2000 && next()) {
                     mLastSkipTimeMillis = System.currentTimeMillis();
+
                     Toast.makeText(this, getString(R.string.next_button_message),
                             Toast.LENGTH_SHORT).show();
                     FlurryAgent.logEvent("Next");
-
                 }
             default:
                 return super.onOptionsItemSelected(item);
