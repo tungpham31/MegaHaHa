@@ -1,29 +1,14 @@
 package com.awwstream.android;
 
-import android.annotation.TargetApi;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.ShareActionProvider;
-import com.actionbarsherlock.widget.ShareActionProvider.OnShareTargetSelectedListener;
-import com.flurry.android.FlurryAgent;
-import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
-import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
-import com.google.android.youtube.player.YouTubePlayer.OnInitializedListener;
-import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener;
-import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.tapjoy.TapjoyConnect;
@@ -37,10 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The main activity.
+ * The activity to display Featured videos.
  */
-public final class MainActivity extends SherlockFragmentActivity implements OnInitializedListener,
-        PlaylistEventListener, PlayerStateChangeListener {
+public final class FeaturedActivity extends YouTubeActivity {
     private static final String YOUTUBE_PLAYLIST_ID = "PLSgXk6DxD9Qt5NB5GhfhU0apqjkr7pMyC";
 
     private static final String URL_TO_GET_PLAYLIST_INFORMATION =
@@ -49,8 +33,6 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
 
     private static final String DOCUMENT_CONTAINING_FACEBOOK_ULRS_FOR_VIDEOS =
             "https://docs.google.com/document/d/14wVSOe2vmQ4LDgqI2ZvlGtHXFCxTlGFRLlrflXa3U7I/edit?usp=sharing";
-
-    private static final int RECOVERY_DIALOG_REQUEST = 1;
 
     /**
      * A list of video titles in the same order as in playlist.
@@ -75,44 +57,14 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
     private int mPendingTasks;
 
     /**
-     * A variable to keep track of the current video id.
-     */
-    private String mCurrentVideoId;
-
-    /**
-     * Keep track of position of the current video playing.
-     */
-    private int mCurrentVideoNumber;
-
-    /**
      * Keep track of position of the first video played.
      */
     private int mFirstVideoNumber;
 
     /**
-     * The share menu item.
+     * {@link SharedPreferences} to save variables.
      */
-    private ShareActionProvider mShareActionProvider;
-
-    /**
-     * Shared Preferences to save variables.
-     */
-    private Editor mPrefEditor;
-
-    /**
-     * YouTube player.
-     */
-    private YouTubePlayer mYouTubePlayer;
-
-    /**
-     * Timer for skip button.
-     */
-    private long mLastSkipTimeMillis;
-
-    /**
-     * Title of the current video.
-     */
-    private TextView mTitle;
+    private SharedPreferences mPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,11 +88,10 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
                 R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
 
         // Get {@link SharedPreferences}.
-        final SharedPreferences prefs = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
-        mPrefEditor = prefs.edit();
+        mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
 
         // Get current video and current time playing from {@link SharedPreferences}.
-        mCurrentVideoNumber = prefs.getInt("mCurrentVideoNumber", 0);
+        mCurrentVideoNumber = mPref.getInt("mCurrentVideoNumber", 0);
 
         // Support going back up to 5 videos.
         mFirstVideoNumber = Math.max(0, mCurrentVideoNumber - 5);
@@ -149,8 +100,6 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
     @Override
     protected void onStart() {
         super.onStart();
-
-        FlurryAgent.onStartSession(this, "4QVGFH2RQW3ZM5X4W2C3");
 
         if (mPendingTasks == 0) {
             mPendingTasks = 2;
@@ -170,22 +119,8 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
     protected void onStop() {
         super.onStop();
 
-        FlurryAgent.onEndSession(this);
-
         // Save position of current video and current time in it.
-        mPrefEditor.putInt("mCurrentVideoNumber", mCurrentVideoNumber);
-        mPrefEditor.commit();
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (mYouTubePlayer != null) {
-            mYouTubePlayer.setPlaylistEventListener(this);
-            mYouTubePlayer.setPlayerStateChangeListener(this);
-            mYouTubePlayer = null;
-        }
-
-        super.onDestroy();
+        mPref.edit().putInt("mCurrentVideoNumber", mCurrentVideoNumber).commit();
     }
 
     /**
@@ -381,98 +316,10 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getSupportMenuInflater().inflate(R.menu.main, menu);
-
-        // Locate MenuItem with ShareActionProvider.
-        mShareActionProvider =
-                (ShareActionProvider) menu.findItem(R.id.menu_item_share).getActionProvider();
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection.
-        switch (item.getItemId()) {
-            case R.id.menu_like:
-                Toast.makeText(this, getString(R.string.like_button_message), Toast.LENGTH_SHORT)
-                        .show();
-                FlurryAgent.logEvent("Like");
-                return true;
-            case R.id.menu_dislike:
-                Toast.makeText(this, getString(R.string.dislike_button_message), Toast.LENGTH_SHORT)
-                        .show();
-                FlurryAgent.logEvent("Disike");
-                return true;
-            case R.id.menu_next:
-                if (mYouTubePlayer != null && mYouTubePlayer.hasNext()
-                        && System.currentTimeMillis() - mLastSkipTimeMillis >= 2000) {
-                    mYouTubePlayer.next();
-                    mLastSkipTimeMillis = System.currentTimeMillis();
-                    Toast.makeText(this, getString(R.string.next_button_message),
-                            Toast.LENGTH_SHORT).show();
-                    FlurryAgent.logEvent("Next");
-                }
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    /**
-     * Update the title of the video.
-     */
-    private void updateTitle(String videoId) {
-        final int position = mVideoIds.indexOf(videoId);
-        if (0 <= position) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-                mTitle.setText(mVideoTitles.get(position));
-            } else {
-                setTitle(mVideoTitles.get(position));
-            }
-        }
-    }
-
-    /**
-     * Update the share action.
-     */
-    private void updateShareAction(String videoId) {
-        final String link = mUrlMap.get(videoId);
-        if (mShareActionProvider != null && !TextUtils.isEmpty(link)) {
-            final Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, link);
-            mShareActionProvider.setShareIntent(intent);
-            mShareActionProvider
-                    .setOnShareTargetSelectedListener(new OnShareTargetSelectedListener() {
-                        @Override
-                        public boolean onShareTargetSelected(ShareActionProvider source,
-                                Intent intent) {
-                            if (!TextUtils.isEmpty(intent.getPackage())) {
-                                FlurryAgent.logEvent("Share" + "-"
-                                        + intent.getComponent().getPackageName());
-                            } else {
-                                FlurryAgent.logEvent("Share");
-
-                            }
-
-                            return false;
-                        }
-                    });
-        }
-    }
-
-    @Override
     public void
             onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
-        // If successfully initialize YouTube player, store that player in a global mYouTubePlayer.
-        // Set up listeners for the player.
-        mYouTubePlayer = player;
-        mYouTubePlayer.setPlaylistEventListener(this);
-        mYouTubePlayer.setPlayerStateChangeListener(this);
+        super.onInitializationSuccess(provider, player, wasRestored);
 
-        // If the playlist is not restored, we have load it into the YouTube player.
         if (!wasRestored) {
             mYouTubePlayer.loadPlaylist(YOUTUBE_PLAYLIST_ID, mCurrentVideoNumber, 0);
         }
@@ -489,69 +336,29 @@ public final class MainActivity extends SherlockFragmentActivity implements OnIn
     }
 
     @Override
-    public void onPlaylistEnded() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onLoading() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onAdStarted() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onError(ErrorReason error) {
-        if (ErrorReason.UNEXPECTED_SERVICE_DISCONNECTION.equals(error)) {
-            mYouTubePlayer = null;
+    protected void updateTitle(String videoId) {
+        final int position = mVideoIds.indexOf(videoId);
+        if (0 <= position) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                mTitle.setText(mVideoTitles.get(position));
+            } else {
+                setTitle(mVideoTitles.get(position));
+            }
         }
     }
 
     @Override
-    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-    public void onLoaded(String videoId) {
-        mCurrentVideoId = videoId;
-
-        // Enter low profile mode.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            findViewById(R.id.content_frame).setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-        }
-
-        updateTitle(videoId);
-        updateShareAction(videoId);
+    protected String getShareActionLink(String videoId) {
+        return mUrlMap.get(videoId);
     }
 
     @Override
-    public void onVideoEnded() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onVideoStarted() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onInitializationFailure(Provider provider, YouTubeInitializationResult errorReason) {
-        if (errorReason.isUserRecoverableError()) {
-            errorReason.getErrorDialog(this, RECOVERY_DIALOG_REQUEST).show();
+    protected boolean next() {
+        if (mYouTubePlayer.hasNext()) {
+            mYouTubePlayer.next();
+            return true;
         } else {
-            final String errorMessage =
-                    String.format(getString(R.string.error_player), errorReason.toString());
-            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == RECOVERY_DIALOG_REQUEST) {
-            // Retry initialization if user performed a recovery action and there is network
-            // available.
-            ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
+            return false;
         }
     }
 }
