@@ -61,6 +61,11 @@ public class HotActivity extends YouTubeActivity {
     }
 
     @Override
+    public void onVideoEnded() {
+        next();
+    }
+
+    @Override
     protected void updateTitle(String videoId) {
         mTitle.setText(mVideos.get(mCurrentVideoNumber).getString("title"));
     }
