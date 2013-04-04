@@ -103,16 +103,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 }
             }
         });
+        mMenuDrawer.setMenuSize(getResources().getDimensionPixelSize(R.dimen.menu_drawer_width));
 
-        findViewById(R.id.featured).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final Intent intent = new Intent(YouTubeActivity.this, FeaturedActivity.class);
-                startActivity(intent);
-                finish();
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            }
-        });
         findViewById(R.id.hot).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -138,6 +130,15 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
         // Get {@link SharedPreferences}.
         mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+
+        upgradeIfNeeded();
+    }
+
+    private void upgradeIfNeeded() {
+        if (mPref.getBoolean("upgraded", false)) {
+            return;
+        }
+
     }
 
     @Override

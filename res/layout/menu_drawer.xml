@@ -1,29 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="@dimen/menu_drawer_width"
     android:layout_height="match_parent"
     android:background="@drawable/dark_background_normal"
     android:orientation="vertical" >
-
-    <Button
-        android:id="@+id/featured"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/dark_background_selector"
-        android:gravity="left|center_vertical"
-        android:paddingBottom="12dip"
-        android:paddingLeft="32dip"
-        android:paddingTop="12dip"
-        android:text="@string/featured"
-        android:textColor="@android:color/white"
-        android:textStyle="bold" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="4dip"
-        android:layout_marginLeft="16dip"
-        android:layout_marginRight="16dip"
-        android:background="#66666666" />
 
     <Button
         android:id="@+id/hot"
@@ -40,10 +20,10 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="4dip"
+        android:layout_height="2dip"
         android:layout_marginLeft="16dip"
         android:layout_marginRight="16dip"
-        android:background="#66666666" />
+        android:background="@drawable/divider" />
 
     <Button
         android:id="@+id/new_button"
@@ -60,9 +40,9 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="4dip"
+        android:layout_height="2dip"
         android:layout_marginLeft="16dip"
         android:layout_marginRight="16dip"
-        android:background="#66666666" />
+        android:background="@drawable/divider" />
 
 </LinearLayout>
