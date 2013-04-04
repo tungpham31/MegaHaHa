@@ -7,6 +7,6 @@ import android.app.Activity;
  */
 public final class NewActivity extends UserActivity {
     protected String sortKey() {
-        return "created_at";
+        return "createdAt";
     }
 }

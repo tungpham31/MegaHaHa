@@ -130,15 +130,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
         // Get {@link SharedPreferences}.
         mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
-
-        upgradeIfNeeded();
-    }
-
-    private void upgradeIfNeeded() {
-        if (mPref.getBoolean("upgraded", false)) {
-            return;
-        }
-
     }
 
     @Override

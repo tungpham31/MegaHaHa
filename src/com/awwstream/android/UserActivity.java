@@ -19,19 +19,23 @@ public abstract class UserActivity extends YouTubeActivity {
     private List<ParseObject> mVideos;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final ParseQuery innerQuery = new ParseQuery("Watched");
-        innerQuery.whereEqualTo("username", mPref.getString("username", null));
+        final ParseQuery watchedQuery = new ParseQuery("Watched");
+        watchedQuery.whereEqualTo("username", mPref.getString("username", null));
 
-        final ParseQuery innerQuery1 = new ParseQuery("FeaturedVideo");
-        innerQuery1.whereLessThan("position", mPref.getInt("mCurrentVideoNumber", 0));
+        final ParseQuery notWatchedQuery = new ParseQuery("Video");
+        notWatchedQuery.whereDoesNotMatchKeyInQuery("videoId", "videoId", watchedQuery);
+
+        final ParseQuery featureQuery = new ParseQuery("FeaturedVideo");
+        featureQuery.whereLessThan("position", mPref.getInt("mCurrentVideoNumber", 0));
 
         final ParseQuery query = new ParseQuery("Video");
-        query.whereDoesNotMatchKeyInQuery("videoId", "videoId", innerQuery);
-        query.whereDoesNotMatchKeyInQuery("videoId", "videoId", innerQuery1);
+        query.whereMatchesKeyInQuery("videoId", "videoId", notWatchedQuery);
+        query.whereDoesNotMatchKeyInQuery("videoId", "videoId", featureQuery);
         query.addDescendingOrder(sortKey());
+        query.addDescendingOrder("createdAt");
         query.findInBackground(new FindCallback() {
             @Override
             public void done(List<ParseObject> videos, ParseException e) {
@@ -39,7 +43,12 @@ public abstract class UserActivity extends YouTubeActivity {
 
                 if (mVideos != null && !mVideos.isEmpty()) {
                     mCurrentVideoNumber = 0;
-                    loadVideo();
+                    if (savedInstanceState == null) {
+                        loadVideo();
+                    } else {
+                        updateTitle(mVideos.get(0).getString("videoId"));
+                        updateShareAction(mVideos.get(0).getString("videoId"));
+                    }
                 }
             }
         });
@@ -71,7 +80,9 @@ public abstract class UserActivity extends YouTubeActivity {
 
     @Override
     protected void updateTitle(String videoId) {
-        mTitle.setText(mVideos.get(mCurrentVideoNumber).getString("title"));
+        if (mVideos != null) {
+            mTitle.setText(mVideos.get(mCurrentVideoNumber).getString("title"));
+        }
     }
 
     @Override
