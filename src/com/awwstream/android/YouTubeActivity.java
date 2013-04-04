@@ -3,6 +3,7 @@ package com.awwstream.android;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -25,6 +26,7 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
+import com.parse.ParseObject;
 
 import net.simonvt.menudrawer.MenuDrawer;
 
@@ -59,6 +61,11 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
      * The share menu item.
      */
     protected ShareActionProvider mShareActionProvider;
+
+    /**
+     * {@link SharedPreferences} to save variables.
+     */
+    protected SharedPreferences mPref;
 
     /**
      * Timer for skip button.
@@ -115,6 +122,9 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Initialize {@link YouTubePlayerSupportFragment}.
         ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
                 R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
+
+        // Get {@link SharedPreferences}.
+        mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
     }
 
     @Override
@@ -268,6 +278,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     @Override
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void onLoaded(String videoId) {
+        markVideoAsWatched(mCurrentVideoId);
+
         mCurrentVideoId = videoId;
 
         // Enter low profile mode.
@@ -289,11 +301,16 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Do nothing.
     }
 
-    protected abstract void updateTitle(String videoId);
+    private void markVideoAsWatched(String videoId) {
+        if (TextUtils.isEmpty(videoId)) {
+            return;
+        }
 
-    protected abstract String getShareActionLink(String videoId);
-
-    protected abstract boolean next();
+        final ParseObject userVideo = new ParseObject("Watched");
+        userVideo.put("username", mPref.getString("username", null));
+        userVideo.put("videoId", videoId);
+        userVideo.saveInBackground();
+    }
 
     protected void updateShareAction(String videoId) {
         final String link = getShareActionLink(videoId);
@@ -304,4 +321,10 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             mShareActionProvider.setShareIntent(intent);
         }
     }
+
+    protected abstract void updateTitle(String videoId);
+
+    protected abstract String getShareActionLink(String videoId);
+
+    protected abstract boolean next();
 }

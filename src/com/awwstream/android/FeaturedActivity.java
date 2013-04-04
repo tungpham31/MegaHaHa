@@ -1,6 +1,5 @@
 package com.awwstream.android;
 
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -57,11 +56,6 @@ public final class FeaturedActivity extends YouTubeActivity {
      */
     private int mFirstVideoNumber;
 
-    /**
-     * {@link SharedPreferences} to save variables.
-     */
-    private SharedPreferences mPref;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,9 +63,6 @@ public final class FeaturedActivity extends YouTubeActivity {
         // Connect to Tapjoy.
         TapjoyConnect.requestTapjoyConnect(getApplicationContext(),
                 "ea839ae2-ed5a-4fbb-ad3f-d5dbf7092c50", "yduuUm38cteYT4lhsiwb");
-
-        // Get {@link SharedPreferences}.
-        mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
 
         // Get current video and current time playing from {@link SharedPreferences}.
         mCurrentVideoNumber = mPref.getInt("mCurrentVideoNumber", 0);

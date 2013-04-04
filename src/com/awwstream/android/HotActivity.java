@@ -22,8 +22,12 @@ public class HotActivity extends YouTubeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        final ParseQuery innerQuery = new ParseQuery("Watched");
+        innerQuery.whereEqualTo("username", mPref.getString("username", null));
+
         final ParseQuery query = new ParseQuery("Video");
-        query.addDescendingOrder("score");
+        query.whereDoesNotMatchKeyInQuery("videoId", "videoId", innerQuery);
+        query.addDescendingOrder(sortKey());
         query.findInBackground(new FindCallback() {
             @Override
             public void done(List<ParseObject> videos, ParseException e) {
@@ -75,5 +79,9 @@ public class HotActivity extends YouTubeActivity {
         } else {
             return false;
         }
+    }
+
+    protected String sortKey() {
+        return "score";
     }
 }
