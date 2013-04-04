@@ -5,7 +5,7 @@ import android.app.Activity;
 /**
  * The {@link Activity} to play New videos.
  */
-public class NewActivity extends HotActivity {
+public final class NewActivity extends UserActivity {
     protected String sortKey() {
         return "created_at";
     }

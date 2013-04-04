@@ -11,7 +11,7 @@ import com.parse.SaveCallback;
 /**
  * The main {@link Application}.
  */
-public class MainApplication extends Application {
+public final class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();

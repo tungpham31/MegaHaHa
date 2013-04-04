@@ -11,7 +11,7 @@ import com.flurry.android.FlurryAgent;
 /**
  * An UI-less {@link Activity} to share video.
  */
-public class ShareActivity extends Activity {
+public final class ShareActivity extends Activity {
     private static final String YOU_TUBE_URL = "http://www.youtube.com/watch?v=";
     private static final String YOU_TUBE_SECURE_URL = "https://www.youtube.com/watch?v=";
 

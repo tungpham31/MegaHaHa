@@ -29,6 +29,7 @@ import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.parse.ParseObject;
 
 import net.simonvt.menudrawer.MenuDrawer;
+import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
 
 /**
  * The base {@link Activity}.
@@ -81,12 +82,27 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.main);
+        // Initialize {@link ActionBar}.
+        final View view = getLayoutInflater().inflate(R.layout.title, null);
+        mTitle = (TextView) view.findViewById(R.id.title);
+        getSupportActionBar().setCustomView(view);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Initialize {@link MenuDrawer}.
-        mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.MENU_DRAG_WINDOW);
+        mMenuDrawer = MenuDrawer.attach(this, MenuDrawer.MENU_DRAG_CONTENT);
         mMenuDrawer.setTouchMode(MenuDrawer.TOUCH_MODE_FULLSCREEN);
+        mMenuDrawer.setContentView(R.layout.main);
         mMenuDrawer.setMenuView(R.layout.menu_drawer);
+        mMenuDrawer.setOnDrawerStateChangeListener(new OnDrawerStateChangeListener() {
+            @Override
+            public void onDrawerStateChange(int oldState, int newState) {
+                if (newState == MenuDrawer.STATE_CLOSED || newState == MenuDrawer.STATE_CLOSING) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                } else {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                }
+            }
+        });
 
         findViewById(R.id.featured).setOnClickListener(new OnClickListener() {
             @Override
@@ -94,6 +110,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 final Intent intent = new Intent(YouTubeActivity.this, FeaturedActivity.class);
                 startActivity(intent);
                 finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
         });
         findViewById(R.id.hot).setOnClickListener(new OnClickListener() {
@@ -102,6 +119,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 final Intent intent = new Intent(YouTubeActivity.this, HotActivity.class);
                 startActivity(intent);
                 finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
         });
         findViewById(R.id.new_button).setOnClickListener(new OnClickListener() {
@@ -110,14 +128,9 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 final Intent intent = new Intent(YouTubeActivity.this, NewActivity.class);
                 startActivity(intent);
                 finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
         });
-
-        // Initialize {@link ActionBar}.
-        final View view = getLayoutInflater().inflate(R.layout.title, null);
-        mTitle = (TextView) view.findViewById(R.id.title);
-        getSupportActionBar().setCustomView(view);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Initialize {@link YouTubePlayerSupportFragment}.
         ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
@@ -159,7 +172,9 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Handle item selection.
         switch (item.getItemId()) {
             case android.R.id.home:
-                mMenuDrawer.openMenu();
+                mMenuDrawer.toggleMenu();
+
+                FlurryAgent.logEvent("Up");
                 return true;
             case R.id.menu_like:
                 if (!TextUtils.isEmpty(mCurrentVideoId)) {

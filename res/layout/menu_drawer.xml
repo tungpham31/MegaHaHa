@@ -5,12 +5,6 @@
     android:background="@drawable/dark_background_normal"
     android:orientation="vertical" >
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:layout_marginTop="48dip"
-        android:background="@drawable/dark_divider" />
-
     <Button
         android:id="@+id/featured"
         android:layout_width="match_parent"
@@ -18,7 +12,7 @@
         android:background="@drawable/dark_background_selector"
         android:gravity="left|center_vertical"
         android:paddingBottom="12dip"
-        android:paddingLeft="16dip"
+        android:paddingLeft="32dip"
         android:paddingTop="12dip"
         android:text="@string/featured"
         android:textColor="@android:color/white"
@@ -26,8 +20,10 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="@drawable/dark_divider" />
+        android:layout_height="4dip"
+        android:layout_marginLeft="16dip"
+        android:layout_marginRight="16dip"
+        android:background="#66666666" />
 
     <Button
         android:id="@+id/hot"
@@ -36,7 +32,7 @@
         android:background="@drawable/dark_background_selector"
         android:gravity="left|center_vertical"
         android:paddingBottom="12dip"
-        android:paddingLeft="16dip"
+        android:paddingLeft="32dip"
         android:paddingTop="12dip"
         android:text="@string/hot"
         android:textColor="@android:color/white"
@@ -44,8 +40,10 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="@drawable/dark_divider" />
+        android:layout_height="4dip"
+        android:layout_marginLeft="16dip"
+        android:layout_marginRight="16dip"
+        android:background="#66666666" />
 
     <Button
         android:id="@+id/new_button"
@@ -54,7 +52,7 @@
         android:background="@drawable/dark_background_selector"
         android:gravity="left|center_vertical"
         android:paddingBottom="12dip"
-        android:paddingLeft="16dip"
+        android:paddingLeft="32dip"
         android:paddingTop="12dip"
         android:text="@string/new_string"
         android:textColor="@android:color/white"
@@ -62,7 +60,9 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dip"
-        android:background="@drawable/dark_divider" />
+        android:layout_height="4dip"
+        android:layout_marginLeft="16dip"
+        android:layout_marginRight="16dip"
+        android:background="#66666666" />
 
 </LinearLayout>
