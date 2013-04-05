@@ -98,7 +98,7 @@ public abstract class UserActivity extends YouTubeActivity {
             markVideoAsWatched(mCurrentVideoId);
 
             mCurrentVideoNumber++;
-            mCurrentVideoId = mVideos.get(0).getString("videoId");
+            mCurrentVideoId = mVideos.get(mCurrentVideoNumber).getString("videoId");
 
             updateTitle(mCurrentVideoId);
             updateShareAction(mCurrentVideoId);
