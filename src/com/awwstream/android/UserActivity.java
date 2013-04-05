@@ -49,9 +49,12 @@ public abstract class UserActivity extends YouTubeActivity {
     private void loadVideos(final boolean wasRestored) {
         final ParseQuery watchedQuery = new ParseQuery("Watched");
         watchedQuery.whereEqualTo("username", mPref.getString("username", null));
+        watchedQuery.setLimit(1000);
 
         final ParseQuery notWatchedQuery = new ParseQuery("Video");
         notWatchedQuery.whereDoesNotMatchKeyInQuery("videoId", "videoId", watchedQuery);
+        notWatchedQuery.addDescendingOrder("createdAt");
+        notWatchedQuery.setLimit(1000);
 
         final ParseQuery featureQuery = new ParseQuery("FeaturedVideo");
         featureQuery.whereLessThan("position", mPref.getInt("mCurrentVideoNumber", 0));
@@ -112,9 +115,11 @@ public abstract class UserActivity extends YouTubeActivity {
 
     @Override
     protected void updateTitle(String videoId) {
-        if (mVideos != null) {
-            mTitle.setText(mVideos.get(mCurrentVideoNumber).getString("title"));
+        if (mVideos == null || mVideos.isEmpty()) {
+            return;
         }
+
+        mTitle.setText(mVideos.get(mCurrentVideoNumber).getString("title"));
     }
 
     @Override
@@ -124,6 +129,10 @@ public abstract class UserActivity extends YouTubeActivity {
 
     @Override
     protected boolean next() {
+        if (mVideos == null || mVideos.isEmpty()) {
+            return false;
+        }
+
         if (mCurrentVideoNumber < mVideos.size() - 1) {
             markVideoAsWatched(mCurrentVideoId);
 
