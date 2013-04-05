@@ -10,6 +10,8 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.List;
 
@@ -23,6 +25,28 @@ public abstract class UserActivity extends YouTubeActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setProgressBarIndeterminateVisibility(true);
+
+        if (mPref.getString("username", null) == null) {
+            ParseUser.enableAutomaticUser();
+            ParseUser.getCurrentUser().saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (isFinishing()) {
+                        return;
+                    }
+
+                    mPref.edit().putString("username", ParseUser.getCurrentUser().getUsername())
+                            .commit();
+                    loadVideos(savedInstanceState != null);
+                }
+            });
+        } else {
+            loadVideos(savedInstanceState != null);
+        }
+    }
+
+    private void loadVideos(final boolean wasRestored) {
         final ParseQuery watchedQuery = new ParseQuery("Watched");
         watchedQuery.whereEqualTo("username", mPref.getString("username", null));
 
@@ -40,6 +64,12 @@ public abstract class UserActivity extends YouTubeActivity {
         query.findInBackground(new FindCallback() {
             @Override
             public void done(List<ParseObject> videos, ParseException e) {
+                if (isFinishing()) {
+                    return;
+                }
+
+                setProgressBarIndeterminateVisibility(false);
+
                 mVideos = videos;
 
                 if (mVideos != null && !mVideos.isEmpty()) {
@@ -49,7 +79,7 @@ public abstract class UserActivity extends YouTubeActivity {
                     updateTitle(mCurrentVideoId);
                     updateShareAction(mCurrentVideoId);
 
-                    if (savedInstanceState == null) {
+                    if (!wasRestored) {
                         loadVideo();
                     }
                 }
