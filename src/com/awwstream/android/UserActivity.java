@@ -49,6 +49,7 @@ public abstract class UserActivity extends YouTubeActivity {
     private void loadVideos(final boolean wasRestored) {
         final ParseQuery watchedQuery = new ParseQuery("Watched");
         watchedQuery.whereEqualTo("username", mPref.getString("username", null));
+        watchedQuery.addDescendingOrder("createdAt");
         watchedQuery.setLimit(1000);
 
         final ParseQuery notWatchedQuery = new ParseQuery("Video");
