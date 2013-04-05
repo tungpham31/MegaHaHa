@@ -181,6 +181,10 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 FlurryAgent.logEvent("Like");
                 return true;
             case R.id.menu_dislike:
+                if (!TextUtils.isEmpty(mCurrentVideoId)) {
+                    Utils.demoteVideo(mCurrentVideoId);
+                }
+
                 if (mYouTubePlayer != null
                         && System.currentTimeMillis() - mLastSkipTimeMillis >= 2000 && next()) {
                     mLastSkipTimeMillis = System.currentTimeMillis();

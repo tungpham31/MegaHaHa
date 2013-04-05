@@ -1,11 +1,9 @@
 package com.awwstream.android;
 
-import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-
-import java.util.List;
 
 /**
  * Helper class.
@@ -25,19 +23,39 @@ public class Utils {
     public static void promoteVideo(final String videoId, final String title) {
         final ParseQuery query = new ParseQuery("Video");
         query.whereEqualTo("videoId", videoId);
-        query.findInBackground(new FindCallback() {
+        query.getFirstInBackground(new GetCallback() {
             @Override
-            public void done(List<ParseObject> videos, ParseException e) {
-                if (videos == null || videos.isEmpty()) {
-                    final ParseObject video = new ParseObject("Video");
+            public void done(ParseObject video, ParseException e) {
+                if (video == null) {
+                    video = new ParseObject("Video");
                     video.put("videoId", videoId);
                     video.put("title", title);
-                    video.put("score", 1);
-                    video.saveInBackground();
+                    video.put("score", 0);
                 } else {
-                    videos.get(0).increment("score");
-                    videos.get(0).saveInBackground();
+                    video.increment("score", Integer.valueOf(2));
                 }
+                video.saveInBackground();
+            }
+        });
+    }
+
+    /**
+     * Demotes a video.
+     * @param videoId
+     *            the video id.
+     * @param title
+     *            the title.
+     */
+    public static void demoteVideo(final String videoId) {
+        final ParseQuery query = new ParseQuery("Video");
+        query.whereEqualTo("videoId", videoId);
+        query.getFirstInBackground(new GetCallback() {
+            @Override
+            public void done(ParseObject video, ParseException e) {
+                if (video != null) {
+                    video.increment("score", Integer.valueOf(-1));
+                }
+                video.saveInBackground();
             }
         });
     }
