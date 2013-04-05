@@ -202,6 +202,25 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RECOVERY_DIALOG_REQUEST) {
+            // Retry initialization if user performed a recovery action and there is network
+            // available.
+            ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
+                    R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mMenuDrawer.isMenuVisible()) {
+            mMenuDrawer.closeMenu();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
 
@@ -217,16 +236,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         }
 
         super.onDestroy();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == RECOVERY_DIALOG_REQUEST) {
-            // Retry initialization if user performed a recovery action and there is network
-            // available.
-            ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
-                    R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
-        }
     }
 
     @Override
