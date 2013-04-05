@@ -19,6 +19,7 @@ import com.actionbarsherlock.view.Window;
 import com.actionbarsherlock.widget.ShareActionProvider;
 import com.actionbarsherlock.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import com.flurry.android.FlurryAgent;
+import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.ErrorReason;
@@ -115,6 +116,9 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 startActivity(intent);
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+
+                FlurryAgent.logEvent("Hot");
+                EasyTracker.getTracker().sendEvent("Page", "View", "Hot", null);
             }
         });
         findViewById(R.id.new_button).setOnClickListener(new OnClickListener() {
@@ -124,6 +128,9 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 startActivity(intent);
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+
+                FlurryAgent.logEvent("New");
+                EasyTracker.getTracker().sendEvent("Page", "View", "New", null);
             }
         });
 
@@ -140,6 +147,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         super.onStart();
 
         FlurryAgent.onStartSession(this, "4QVGFH2RQW3ZM5X4W2C3");
+        EasyTracker.getInstance().activityStart(this);
     }
 
     @Override
@@ -170,6 +178,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 mMenuDrawer.toggleMenu();
 
                 FlurryAgent.logEvent("Up");
+                EasyTracker.getTracker().sendEvent("UI", "Click", "Up", null);
                 return true;
             case R.id.menu_like:
                 if (!TextUtils.isEmpty(mCurrentVideoId)) {
@@ -179,6 +188,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 Toast.makeText(this, getString(R.string.like_button_message), Toast.LENGTH_SHORT)
                         .show();
                 FlurryAgent.logEvent("Like");
+                EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
                 return true;
             case R.id.menu_dislike:
                 if (!TextUtils.isEmpty(mCurrentVideoId)) {
@@ -193,6 +203,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 Toast.makeText(this, getString(R.string.dislike_button_message), Toast.LENGTH_SHORT)
                         .show();
                 FlurryAgent.logEvent("Disike");
+                EasyTracker.getTracker().sendEvent("UI", "Click", "Dislike", null);
                 return true;
             case R.id.menu_next:
                 if (mYouTubePlayer != null
@@ -202,7 +213,9 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                     Toast.makeText(this, getString(R.string.next_button_message),
                             Toast.LENGTH_SHORT).show();
                     FlurryAgent.logEvent("Next");
+                    EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
                 }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -232,6 +245,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         super.onStop();
 
         FlurryAgent.onEndSession(this);
+        EasyTracker.getInstance().activityStop(this);
     }
 
     @Override

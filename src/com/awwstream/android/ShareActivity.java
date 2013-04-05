@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.flurry.android.FlurryAgent;
+import com.google.analytics.tracking.android.EasyTracker;
 
 /**
  * An UI-less {@link Activity} to share video.
@@ -39,6 +40,8 @@ public final class ShareActivity extends Activity {
 
         Toast.makeText(this, R.string.share_message, Toast.LENGTH_SHORT).show();
         FlurryAgent.logEvent("Promote");
+        EasyTracker.getTracker().sendEvent("UI", "Click", "Promote", null);
+
         finish();
     }
 }
