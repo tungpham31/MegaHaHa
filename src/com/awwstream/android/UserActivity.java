@@ -2,6 +2,7 @@ package com.awwstream.android;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
@@ -43,11 +44,13 @@ public abstract class UserActivity extends YouTubeActivity {
 
                 if (mVideos != null && !mVideos.isEmpty()) {
                     mCurrentVideoNumber = 0;
+                    mCurrentVideoId = mVideos.get(0).getString("videoId");
+
+                    updateTitle(mCurrentVideoId);
+                    updateShareAction(mCurrentVideoId);
+
                     if (savedInstanceState == null) {
                         loadVideo();
-                    } else {
-                        updateTitle(mVideos.get(0).getString("videoId"));
-                        updateShareAction(mVideos.get(0).getString("videoId"));
                     }
                 }
             }
@@ -55,12 +58,11 @@ public abstract class UserActivity extends YouTubeActivity {
     }
 
     private void loadVideo() {
-        if (mYouTubePlayer == null || mVideos == null || mVideos.isEmpty()) {
+        if (mYouTubePlayer == null || TextUtils.isEmpty(mCurrentVideoId)) {
             return;
         }
 
-        final ParseObject video = mVideos.get(mCurrentVideoNumber);
-        mYouTubePlayer.loadVideo(video.getString("videoId"));
+        mYouTubePlayer.loadVideo(mCurrentVideoId);
     }
 
     @Override
@@ -93,7 +95,14 @@ public abstract class UserActivity extends YouTubeActivity {
     @Override
     protected boolean next() {
         if (mCurrentVideoNumber < mVideos.size() - 1) {
+            markVideoAsWatched(mCurrentVideoId);
+
             mCurrentVideoNumber++;
+            mCurrentVideoId = mVideos.get(0).getString("videoId");
+
+            updateTitle(mCurrentVideoId);
+            updateShareAction(mCurrentVideoId);
+
             loadVideo();
             return true;
         } else {

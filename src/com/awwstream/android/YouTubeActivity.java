@@ -39,6 +39,21 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     private static final int RECOVERY_DIALOG_REQUEST = 0;
 
     /**
+     * The sliding {@link MenuDrawer}.
+     */
+    private MenuDrawer mMenuDrawer;
+
+    /**
+     * Title of the current video.
+     */
+    protected TextView mTitle;
+
+    /**
+     * The share menu item.
+     */
+    protected ShareActionProvider mShareActionProvider;
+
+    /**
      * YouTube player.
      */
     protected YouTubePlayer mYouTubePlayer;
@@ -54,16 +69,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     protected String mCurrentVideoId;
 
     /**
-     * Title of the current video.
-     */
-    protected TextView mTitle;
-
-    /**
-     * The share menu item.
-     */
-    protected ShareActionProvider mShareActionProvider;
-
-    /**
      * {@link SharedPreferences} to save variables.
      */
     protected SharedPreferences mPref;
@@ -72,11 +77,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
      * Timer for skip button.
      */
     private long mLastSkipTimeMillis;
-
-    /**
-     * The sliding {@link MenuDrawer}.
-     */
-    private MenuDrawer mMenuDrawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -294,17 +294,10 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     @Override
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     public void onLoaded(String videoId) {
-        markVideoAsWatched(mCurrentVideoId);
-
-        mCurrentVideoId = videoId;
-
         // Enter low profile mode.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             findViewById(R.id.content_frame).setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
         }
-
-        updateTitle(videoId);
-        updateShareAction(videoId);
     }
 
     @Override
@@ -317,7 +310,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Do nothing.
     }
 
-    private void markVideoAsWatched(String videoId) {
+    protected void markVideoAsWatched(String videoId) {
         if (TextUtils.isEmpty(videoId)) {
             return;
         }
