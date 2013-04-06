@@ -62,7 +62,7 @@ public abstract class UserActivity extends YouTubeActivity {
 
         final ParseQuery query = new ParseQuery("Video");
         query.whereMatchesKeyInQuery("videoId", "videoId", notWatchedQuery);
-        query.whereDoesNotMatchKeyInQuery("videoId", "videoId", featureQuery);
+        query.whereDoesNotMatchKeyInQuery("videoId", "videoID", featureQuery);
         query.addDescendingOrder(sortKey());
         query.addDescendingOrder("createdAt");
         query.findInBackground(new FindCallback() {
