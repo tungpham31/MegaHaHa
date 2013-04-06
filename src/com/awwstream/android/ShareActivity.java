@@ -21,7 +21,8 @@ public final class ShareActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         final String link = getIntent().getStringExtra(Intent.EXTRA_TEXT);
-        if (TextUtils.isEmpty(link)
+        final String subject = getIntent().getStringExtra(Intent.EXTRA_SUBJECT);
+        if (TextUtils.isEmpty(link) || TextUtils.isEmpty(subject)
                 || (!link.startsWith(YOU_TUBE_URL) && !link.startsWith(YOU_TUBE_SECURE_URL))) {
             Toast.makeText(this, R.string.share_error_message, Toast.LENGTH_SHORT).show();
             finish();
@@ -34,7 +35,7 @@ public final class ShareActivity extends Activity {
         } else {
             videoId = link.substring(YOU_TUBE_SECURE_URL.length()).split("&")[0];
         }
-        final String title = getIntent().getStringExtra(Intent.EXTRA_SUBJECT).split("\"")[1];
+        final String title = subject.split("\"")[1];
 
         Utils.promoteVideo(videoId, title);
 
