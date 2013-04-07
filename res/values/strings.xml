@@ -15,5 +15,6 @@
     <string name="next_button_message">You skip this video</string>
     <string name="share_error_message">Sorry, we can only share YouTube videos</string>
     <string name="share_message">Thank you for sharing this video with AwwStream!</string>
+    <string name="app_id">100826953447727</string>
 
 </resources>

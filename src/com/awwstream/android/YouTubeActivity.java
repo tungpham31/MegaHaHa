@@ -18,6 +18,15 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.actionbarsherlock.widget.ShareActionProvider;
 import com.actionbarsherlock.widget.ShareActionProvider.OnShareTargetSelectedListener;
+import com.facebook.FacebookRequestError;
+import com.facebook.HttpMethod;
+import com.facebook.Request;
+import com.facebook.RequestAsyncTask;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.Session.NewPermissionsRequest;
+import com.facebook.Session.StatusCallback;
+import com.facebook.SessionState;
 import com.flurry.android.FlurryAgent;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.youtube.player.YouTubeInitializationResult;
@@ -32,6 +41,8 @@ import com.parse.ParseObject;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
+
+import java.util.Arrays;
 
 /**
  * The base {@link Activity}.
@@ -189,12 +200,14 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             case R.id.menu_like:
                 if (!TextUtils.isEmpty(mCurrentVideoId)) {
                     Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
+                    publishVideo();
+
+                    Toast.makeText(YouTubeActivity.this, getString(R.string.like_button_message),
+                            Toast.LENGTH_SHORT).show();
+                    FlurryAgent.logEvent("Like");
+                    EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
                 }
 
-                Toast.makeText(this, getString(R.string.like_button_message), Toast.LENGTH_SHORT)
-                        .show();
-                FlurryAgent.logEvent("Like");
-                EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
                 return true;
             case R.id.menu_dislike:
                 if (!TextUtils.isEmpty(mCurrentVideoId)) {
@@ -229,11 +242,15 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == RECOVERY_DIALOG_REQUEST) {
             // Retry initialization if user performed a recovery action and there is network
             // available.
             ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
                     R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
+        } else {
+            Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
         }
     }
 
@@ -356,6 +373,53 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             intent.putExtra(Intent.EXTRA_TEXT, link);
             mShareActionProvider.setShareIntent(intent);
         }
+    }
+
+    private void publishVideo() {
+        final Session session = Session.getActiveSession();
+
+        if (session == null || !session.isOpened()) {
+            Session.openActiveSession(this, true, new StatusCallback() {
+                @Override
+                public void call(Session session, SessionState state, Exception exception) {
+                    if (session != null && session.isOpened()) {
+                        publishVideo();
+                    }
+                    return;
+                }
+            });
+            return;
+        }
+
+        // Check for publish permissions
+        if (!session.getPermissions().contains("publish_actions")) {
+            final NewPermissionsRequest newPermissionsRequest =
+                    new NewPermissionsRequest(this, Arrays.asList("publish_actions"));
+            session.requestNewPublishPermissions(newPermissionsRequest);
+            return;
+        }
+
+        final Bundle params = new Bundle();
+        params.putString("name", mTitle.getText().toString());
+        params.putString("caption", "Download AwwStream Android app");
+        params.putString("description", "on Google Play Store to discover more funny videos.");
+        params.putString("link", getShareActionLink(mCurrentVideoId));
+        params.putString(
+                "actions",
+                "{\"name\": \"Download App\", \"link\": \"https://play.google.com/store/apps/details?id=com.awwstream.android\"}");
+
+        final Request.Callback callback = new Request.Callback() {
+            public void onCompleted(Response response) {
+                final FacebookRequestError error = response.getError();
+                if (error != null) {
+                    Toast.makeText(YouTubeActivity.this, error.getErrorMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+
+        new RequestAsyncTask(new Request(session, "me/feed", params, HttpMethod.POST, callback))
+                .execute();
     }
 
     protected abstract void updateTitle(String videoId);
