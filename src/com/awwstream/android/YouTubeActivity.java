@@ -140,6 +140,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
         // Get {@link SharedPreferences}.
         mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+
+        final int launchCount = mPref.getInt("launchCount", 0);
+        if (launchCount < 3) {
+            mMenuDrawer.openMenu(false);
+            mPref.edit().putInt("launchCount", launchCount + 1).commit();
+        }
     }
 
     @Override
