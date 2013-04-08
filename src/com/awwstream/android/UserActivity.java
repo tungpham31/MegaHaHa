@@ -142,6 +142,8 @@ public abstract class UserActivity extends YouTubeActivity {
 
             updateTitle(mCurrentVideoId);
             updateShareAction(mCurrentVideoId);
+            mIsLikeItemSelected = false;
+            mLikeItem.setIcon(getResources().getDrawable(com.awwstream.android.R.drawable.ic_action_like));
 
             loadVideo();
             return true;

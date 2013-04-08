@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -65,6 +66,16 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
      * The share menu item.
      */
     protected ShareActionProvider mShareActionProvider;
+    
+    /**
+     * The like menu item.
+     */
+    protected MenuItem mLikeItem;
+    
+    /**
+     * Keep track of the state of like menu item.
+     */
+    protected boolean mIsLikeItemSelected;
 
     /**
      * YouTube player.
@@ -171,6 +182,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getSupportMenuInflater().inflate(R.menu.main, menu);
+        
+        // Locate like menu item.
+        mLikeItem = (MenuItem) menu.findItem(R.id.menu_like);
+        
+        // Set state of like menu item to not selected
+        mIsLikeItemSelected = false;
 
         // Locate {@link MenuItem} with {@link ShareActionProvider}.
         mShareActionProvider =
@@ -198,15 +215,19 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 EasyTracker.getTracker().sendEvent("UI", "Click", "Up", null);
                 return true;
             case R.id.menu_like:
-                if (!TextUtils.isEmpty(mCurrentVideoId)) {
-                    Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
-                    publishVideo();
+            	if (!mIsLikeItemSelected){
+            		mIsLikeItemSelected = true;
+            		mLikeItem.setIcon(getResources().getDrawable(com.awwstream.android.R.drawable.ic_action_like_selected));
+            		if (!TextUtils.isEmpty(mCurrentVideoId)) {
+            			Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
+            			publishVideo();
 
-                    Toast.makeText(YouTubeActivity.this, getString(R.string.like_button_message),
-                            Toast.LENGTH_SHORT).show();
-                    FlurryAgent.logEvent("Like");
-                    EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
-                }
+            			Toast.makeText(YouTubeActivity.this, getString(R.string.like_button_message),
+            					Toast.LENGTH_SHORT).show();
+            			FlurryAgent.logEvent("Like");
+            			EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
+            		}
+            	}
 
                 return true;
             case R.id.menu_dislike:
@@ -233,7 +254,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                             Toast.LENGTH_SHORT).show();
                     FlurryAgent.logEvent("Next");
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
-                }
+                } 
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
