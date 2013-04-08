@@ -251,12 +251,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                             builder.show();
                         }
 
-                        Toast.makeText(YouTubeActivity.this,
-                                getString(R.string.like_button_message), Toast.LENGTH_SHORT).show();
                         FlurryAgent.logEvent("Like");
                         EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
                     }
                 }
+                Toast.makeText(YouTubeActivity.this,
+                        getString(R.string.like_button_message), Toast.LENGTH_SHORT).show();
 
                 return true;
             case R.id.menu_dislike:
@@ -296,7 +296,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     protected void updateLikeItem(boolean itemSelected) {
         mIsLikeItemSelected = itemSelected;
         if (mIsLikeItemSelected)
-            mLikeItem.setIcon(getResources().getDrawable(R.drawable.ic_action_like_selected));
+            mLikeItem.setIcon(getResources().getDrawable(R.drawable.ic_action_like));
         else
             mLikeItem.setIcon(getResources().getDrawable(R.drawable.ic_action_like));
     }
