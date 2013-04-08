@@ -2,12 +2,13 @@ package com.awwstream.android;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -66,12 +67,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
      * The share menu item.
      */
     protected ShareActionProvider mShareActionProvider;
-    
+
     /**
      * The like menu item.
      */
     protected MenuItem mLikeItem;
-    
+
     /**
      * Keep track of the state of like menu item.
      */
@@ -135,6 +136,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             @Override
             public void onClick(View view) {
                 final Intent intent = new Intent(YouTubeActivity.this, HotActivity.class);
+                intent.putExtra("internal", true);
                 startActivity(intent);
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -147,6 +149,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             @Override
             public void onClick(View view) {
                 final Intent intent = new Intent(YouTubeActivity.this, NewActivity.class);
+                intent.putExtra("internal", true);
                 startActivity(intent);
                 finish();
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -164,7 +167,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
 
         final int launchCount = mPref.getInt("launchCount", 0);
-        if (launchCount < 3) {
+        if (!getIntent().getBooleanExtra("internal", false) && launchCount < 3) {
             mMenuDrawer.openMenu(false);
             mPref.edit().putInt("launchCount", launchCount + 1).commit();
         }
@@ -182,10 +185,10 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getSupportMenuInflater().inflate(R.menu.main, menu);
-        
+
         // Locate like menu item.
         mLikeItem = (MenuItem) menu.findItem(R.id.menu_like);
-        
+
         // Set state of like menu item to not selected
         mIsLikeItemSelected = false;
 
@@ -215,18 +218,45 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 EasyTracker.getTracker().sendEvent("UI", "Click", "Up", null);
                 return true;
             case R.id.menu_like:
-            	if (!mIsLikeItemSelected){
-            		updateLikeItem(true);
-            		if (!TextUtils.isEmpty(mCurrentVideoId)) {
-            			Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
-            			publishVideo();
+                if (!mIsLikeItemSelected) {
+                    updateLikeItem(true);
+                    if (!TextUtils.isEmpty(mCurrentVideoId)) {
+                        Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
+                        if (mPref.contains("allowFacebook")) {
+                            if (mPref.getBoolean("allowFacebook", true)) {
+                                publishVideo();
+                            }
+                        } else {
+                            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                            builder.setTitle(R.string.facebook);
+                            builder.setMessage(R.string.facebook_warning);
+                            builder.setNegativeButton(R.string.never,
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            mPref.edit().putBoolean("allowFacebook", false)
+                                                    .commit();
+                                        }
+                                    });
+                            builder.setNeutralButton(R.string.no, null);
+                            builder.setPositiveButton(R.string.yes,
+                                    new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            mPref.edit().putBoolean("allowFacebook", true).commit();
+                                            publishVideo();
+                                        }
+                                    });
 
-            			Toast.makeText(YouTubeActivity.this, getString(R.string.like_button_message),
-            					Toast.LENGTH_SHORT).show();
-            			FlurryAgent.logEvent("Like");
-            			EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
-            		}
-            	}
+                            builder.show();
+                        }
+
+                        Toast.makeText(YouTubeActivity.this,
+                                getString(R.string.like_button_message), Toast.LENGTH_SHORT).show();
+                        FlurryAgent.logEvent("Like");
+                        EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
+                    }
+                }
 
                 return true;
             case R.id.menu_dislike:
@@ -253,22 +283,23 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                             Toast.LENGTH_SHORT).show();
                     FlurryAgent.logEvent("Next");
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
-                } 
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-	/**
-	 * Update the like item.
-	 */
-	protected void updateLikeItem(boolean itemSelected) {
-		mIsLikeItemSelected = itemSelected;
-		if (mIsLikeItemSelected)
-			mLikeItem.setIcon(getResources().getDrawable(com.awwstream.android.R.drawable.ic_action_like_selected));
-		else mLikeItem.setIcon(getResources().getDrawable(com.awwstream.android.R.drawable.ic_action_like));
-	}
+    /**
+     * Update the like item.
+     */
+    protected void updateLikeItem(boolean itemSelected) {
+        mIsLikeItemSelected = itemSelected;
+        if (mIsLikeItemSelected)
+            mLikeItem.setIcon(getResources().getDrawable(R.drawable.ic_action_like_selected));
+        else
+            mLikeItem.setIcon(getResources().getDrawable(R.drawable.ic_action_like));
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

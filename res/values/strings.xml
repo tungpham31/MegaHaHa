@@ -16,5 +16,10 @@
     <string name="share_error_message">Sorry, we can only share YouTube videos</string>
     <string name="share_message">Thank you for sharing this video with AwwStream!</string>
     <string name="app_id">100826953447727</string>
+    <string name="facebook">Facebook</string>
+    <string name="facebook_warning">Do you want to automatically share the videos you liked with your friends on Facebook?</string>
+    <string name="never">Never</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
 
 </resources>
