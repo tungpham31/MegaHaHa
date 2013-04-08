@@ -216,8 +216,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 return true;
             case R.id.menu_like:
             	if (!mIsLikeItemSelected){
-            		mIsLikeItemSelected = true;
-            		mLikeItem.setIcon(getResources().getDrawable(com.awwstream.android.R.drawable.ic_action_like_selected));
+            		updateLikeItem(true);
             		if (!TextUtils.isEmpty(mCurrentVideoId)) {
             			Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
             			publishVideo();
@@ -260,6 +259,16 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 return super.onOptionsItemSelected(item);
         }
     }
+
+	/**
+	 * Update the like item.
+	 */
+	protected void updateLikeItem(boolean itemSelected) {
+		mIsLikeItemSelected = itemSelected;
+		if (mIsLikeItemSelected)
+			mLikeItem.setIcon(getResources().getDrawable(com.awwstream.android.R.drawable.ic_action_like_selected));
+		else mLikeItem.setIcon(getResources().getDrawable(com.awwstream.android.R.drawable.ic_action_like));
+	}
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
