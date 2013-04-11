@@ -198,7 +198,10 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
         // Locate {@link menu_fb_connect
         mFacebookConnectItem = menu.findItem(R.id.menu_fb_connect);
-        updateFacebookConnectItem();
+        if (hasUserAndFacebookPermissionToPublishToFacebook())
+            mFacebookConnectItem.setTitle(getString(R.string.fb_disconnect_button));
+        else
+            mFacebookConnectItem.setTitle(getString(R.string.fb_connect_button));
 
         // Locate {@link MenuItem} with {@link ShareActionProvider}.
         mShareActionProvider =
@@ -229,10 +232,10 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             case R.id.menu_like:
                 if (!mIsLikeItemSelected && !TextUtils.isEmpty(mCurrentVideoId)) {
                     updateLikeItem(true);
-                    if (mPref.contains("allowFacebookConnection")
-                            && mPref.getBoolean("allowFacebookConnection", true)
-                            && canAccessFacebook())
+
+                    if (hasUserAndFacebookPermissionToPublishToFacebook())
                         publishVideo();
+
                     Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
                     FlurryAgent.logEvent("Like");
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
@@ -269,33 +272,22 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 return true;
 
             case R.id.menu_fb_connect:
-                if (mPref.contains("allowFacebookConnection")
-                        && mPref.getBoolean("allowFacebookConnection", true)) {
+                if (hasUserAndFacebookPermissionToPublishToFacebook()) {
                     mPref.edit().putBoolean("allowFacebookConnection", false).commit();
-                    updateFacebookConnectItem();
+                    mFacebookConnectItem.setTitle(getString(R.string.fb_connect_button));
                 } else {
-                    if (canAccessFacebook()) {
-                        Log.i("Facebook", "Fully Access");
-                        mPref.edit().putBoolean("allowFacebookConnection", true).commit();
-                        updateFacebookConnectItem();
+                    mPref.edit().putBoolean("allowFacebookConnection", true).commit();
+                    getFacebookPermission();
+                    if (hasUserAndFacebookPermissionToPublishToFacebook()) {
+                        mFacebookConnectItem.setTitle(getString(R.string.fb_disconnect_button));
                     }
                 }
+
                 return true;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    /**
-     * Update title of the Facebook Connect Item.
-     */
-    private void updateFacebookConnectItem() {
-        if (mPref.contains("allowFacebookConnection")
-                && mPref.getBoolean("allowFacebookConnection", true) && canAccessFacebook())
-            mFacebookConnectItem.setTitle(getString(R.string.fb_disconnect_button));
-        else
-            mFacebookConnectItem.setTitle(getString(R.string.fb_connect_button));
     }
 
     /**
@@ -474,11 +466,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
     }
 
-    protected boolean canAccessFacebook() {
-        getFacebookPermission();
+    protected boolean hasUserAndFacebookPermissionToPublishToFacebook() {
         Session session = Session.getActiveSession();
         if (session != null && session.isOpened()
-                && session.getPermissions().contains("publish_actions")) {
+                && session.getPermissions().contains("publish_actions")
+                && mPref.contains("allowFacebookConnection")
+                && mPref.getBoolean("allowFacebookConnection", true)) {
             return true;
         }
 
