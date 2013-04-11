@@ -21,5 +21,6 @@
     <string name="never">Never</string>
     <string name="no">No</string>
     <string name="yes">Yes</string>
-
+    <string name="fb_connect_button">Connect Facebook</string>
+	<string name="fb_disconnect_button">Disconnect Facebook</string>
 </resources>

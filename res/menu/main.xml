@@ -20,5 +20,9 @@
         android:icon="@drawable/ic_action_next"
         android:showAsAction="ifRoom"
         android:title="@string/next_button"/>
+    <item 
+        android:id="@+id/menu_fb_connect"
+        android:showAsAction="ifRoom">
+    </item>
 
 </menu>
