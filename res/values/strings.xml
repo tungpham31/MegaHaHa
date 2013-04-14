@@ -10,8 +10,8 @@
     <string name="dislike_button">Dislike</string>
     <string name="next_button">Next</string>
     <string name="PREFS_NAME">MyPrefsFile</string>
-    <string name="like_button_message">You liked this video</string>
-    <string name="dislike_button_message">You disliked this video</string>
+    <string name="like_button_message">You like this video</string>
+    <string name="dislike_button_message">You dislike this video</string>
     <string name="next_button_message">You skip this video</string>
     <string name="share_error_message">Sorry, we can only share YouTube videos</string>
     <string name="share_message">Thank you for sharing this video with AwwStream!</string>
@@ -23,4 +23,6 @@
     <string name="yes">Yes</string>
     <string name="fb_connect_button">Connect Facebook</string>
 	<string name="fb_disconnect_button">Disconnect Facebook</string>
+	<string name="connect_fb_button_message">You are connected to Facebook</string>
+	<string name="disconnect_fb_button_message">You are disconnected from Facebook</string>
 </resources>

@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -38,12 +37,16 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
+import com.parse.FunctionCallback;
+import com.parse.ParseCloud;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * The base {@link Activity}.
@@ -230,13 +233,16 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                 return true;
 
             case R.id.menu_like:
-                if (!mIsLikeItemSelected && !TextUtils.isEmpty(mCurrentVideoId)) {
-                    updateLikeItem(true);
+                if (!TextUtils.isEmpty(mCurrentVideoId)) {
+                    if (!mIsLikeItemSelected) {
+                        updateLikeItem(true);
+                        if (hasUserAndFacebookPermissionToPublishToFacebook())
+                            publishVideo();
+                        Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
+                    }
 
-                    if (hasUserAndFacebookPermissionToPublishToFacebook())
-                        publishVideo();
-
-                    Utils.promoteVideo(mCurrentVideoId, mTitle.getText().toString());
+                    Toast.makeText(this, getString(R.string.like_button_message),
+                            Toast.LENGTH_SHORT).show();
                     FlurryAgent.logEvent("Like");
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Like", null);
                 }
@@ -273,14 +279,13 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
             case R.id.menu_fb_connect:
                 if (hasUserAndFacebookPermissionToPublishToFacebook()) {
+                    Toast.makeText(this, getString(R.string.disconnect_fb_button_message),
+                            Toast.LENGTH_SHORT).show();
                     mPref.edit().putBoolean("allowFacebookConnection", false).commit();
                     mFacebookConnectItem.setTitle(getString(R.string.fb_connect_button));
                 } else {
                     mPref.edit().putBoolean("allowFacebookConnection", true).commit();
                     getFacebookPermission();
-                    if (hasUserAndFacebookPermissionToPublishToFacebook()) {
-                        mFacebookConnectItem.setTitle(getString(R.string.fb_disconnect_button));
-                    }
                 }
 
                 return true;
@@ -439,7 +444,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     }
 
     private void publishVideo() {
-        Log.i("Facebook", "In Publish Video Method");
         Session session = Session.getActiveSession();
 
         final Bundle params = new Bundle();
@@ -468,6 +472,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
     protected boolean hasUserAndFacebookPermissionToPublishToFacebook() {
         Session session = Session.getActiveSession();
+        
         if (session != null && session.isOpened()
                 && session.getPermissions().contains("publish_actions")
                 && mPref.contains("allowFacebookConnection")
@@ -501,6 +506,11 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             session.requestNewPublishPermissions(newPermissionsRequest);
             return;
         }
+
+        // Notify that user has been connected to Facebook.
+        Toast.makeText(this, getString(R.string.connect_fb_button_message), Toast.LENGTH_SHORT)
+                .show();
+        mFacebookConnectItem.setTitle(getString(R.string.fb_disconnect_button));
 
         return;
     }

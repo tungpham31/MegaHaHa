@@ -1,0 +1,11 @@
+{
+    "applications": {
+        "AwwStream Beta": {
+            "applicationId": "DZQNfL3wXVfWcKQky72xejuQfBjkeZK7g1DjkMrE", 
+            "masterKey": "tpcEZ9Nj9xZu6XntCwg2Dz32lWovVfdCQDKVm142"
+        }, 
+        "_default": {
+            "link": "AwwStream Beta"
+        }
+    }
+}
