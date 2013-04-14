@@ -84,6 +84,7 @@ public abstract class UserActivity extends YouTubeActivity {
                     updateShareAction(mCurrentVideoId);
 
                     if (!wasRestored) {
+                        updateNumberOfViews(mVideos.get(0));
                         loadVideo();
                     }
                 }
@@ -112,6 +113,11 @@ public abstract class UserActivity extends YouTubeActivity {
     @Override
     public void onVideoEnded() {
         next();
+    }
+    
+    protected void updateNumberOfViews(ParseObject currentVideo){
+        currentVideo.increment("view", Integer.valueOf(1));
+        currentVideo.saveInBackground();
     }
 
     @Override
@@ -142,6 +148,7 @@ public abstract class UserActivity extends YouTubeActivity {
 
             updateTitle(mCurrentVideoId);
             updateShareAction(mCurrentVideoId);
+            updateNumberOfViews(mVideos.get(mCurrentVideoNumber));
             updateLikeItem(false);
 
             loadVideo();

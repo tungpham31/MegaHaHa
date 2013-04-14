@@ -32,6 +32,7 @@ public class Utils {
                     video.put("title", title);
                     video.put("score", 0);
                     video.put("like", 0);
+                    video.put("view", 0);
                 } else {
                     video.increment("score", Integer.valueOf(2));
                     video.increment("like", Integer.valueOf(1));
