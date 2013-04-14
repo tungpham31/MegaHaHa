@@ -84,7 +84,6 @@ public abstract class UserActivity extends YouTubeActivity {
                     updateShareAction(mCurrentVideoId);
 
                     if (!wasRestored) {
-                        updateNumberOfViews(mVideos.get(0));
                         loadVideo();
                     }
                 }
@@ -142,13 +141,13 @@ public abstract class UserActivity extends YouTubeActivity {
 
         if (mCurrentVideoNumber < mVideos.size() - 1) {
             markVideoAsWatched(mCurrentVideoId);
+            updateNumberOfViews(mVideos.get(mCurrentVideoNumber));
 
             mCurrentVideoNumber++;
             mCurrentVideoId = mVideos.get(mCurrentVideoNumber).getString("videoId");
 
             updateTitle(mCurrentVideoId);
             updateShareAction(mCurrentVideoId);
-            updateNumberOfViews(mVideos.get(mCurrentVideoNumber));
             updateLikeItem(false);
 
             loadVideo();
