@@ -286,7 +286,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
 
                     // Show AdColony.
-                    new AdColonyVideoAd().show(this);
+                //    new AdColonyVideoAd().show(this);
                 }
                 return true;
 
