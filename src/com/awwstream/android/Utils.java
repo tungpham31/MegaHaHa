@@ -30,13 +30,13 @@ public class Utils {
                     video = new ParseObject("Video");
                     video.put("videoId", videoId);
                     video.put("title", title);
-                    video.put("score", 0);
+                    video.put("score", 1);
                     video.put("like", 0);
                     video.put("view", 0);
-                    video.put("score2", 0);
+                    video.put("score2", 1000);
                 } else {
-                    video.increment("score", Integer.valueOf(2));
-                    video.increment("like", Integer.valueOf(1));
+                    video.increment("score", 2);
+                    video.increment("like");
                 }
                 video.saveInBackground();
             }
@@ -57,7 +57,7 @@ public class Utils {
             @Override
             public void done(ParseObject video, ParseException e) {
                 if (video != null) {
-                    video.increment("score", Integer.valueOf(-1));
+                    video.increment("score", -1);
                 }
                 video.saveInBackground();
             }
