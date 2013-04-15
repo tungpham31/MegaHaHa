@@ -1,13 +1,9 @@
 package com.awwstream.android;
 
-import com.parse.FunctionCallback;
 import com.parse.GetCallback;
-import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-
-import java.util.HashMap;
 
 /**
  * Helper class.

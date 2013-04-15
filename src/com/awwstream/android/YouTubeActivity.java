@@ -37,16 +37,12 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
-import com.parse.FunctionCallback;
-import com.parse.ParseCloud;
-import com.parse.ParseException;
 import com.parse.ParseObject;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
 
 import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * The base {@link Activity}.
@@ -472,7 +468,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
     protected boolean hasUserAndFacebookPermissionToPublishToFacebook() {
         Session session = Session.getActiveSession();
-        
+
         if (session != null && session.isOpened()
                 && session.getPermissions().contains("publish_actions")
                 && mPref.contains("allowFacebookConnection")
