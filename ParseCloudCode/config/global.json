@@ -1,0 +1,14 @@
+{
+    "applications": {
+        "AwwStream": {
+            "applicationId": "nO6zS3yH8Z0N2PmVBeMzjqyqeQBt7vUzckNcxPHH", 
+            "masterKey": "RTY74FM80sQx7Y5tVwceohGiDbS2tySBNhe7rqpf"
+        }, 
+        "_default": {
+            "link": "AwwStream"
+        }
+    }, 
+    "global": {
+        "parseVersion": "1.2.3"
+    }
+}

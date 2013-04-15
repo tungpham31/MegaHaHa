@@ -1,9 +1,13 @@
 package com.awwstream.android;
 
+import com.parse.FunctionCallback;
 import com.parse.GetCallback;
+import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+
+import java.util.HashMap;
 
 /**
  * Helper class.
@@ -33,6 +37,7 @@ public class Utils {
                     video.put("score", 0);
                     video.put("like", 0);
                     video.put("view", 0);
+                    video.put("score2", 0);
                 } else {
                     video.increment("score", Integer.valueOf(2));
                     video.increment("like", Integer.valueOf(1));

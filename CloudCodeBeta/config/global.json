@@ -7,5 +7,8 @@
         "_default": {
             "link": "AwwStream Beta"
         }
+    }, 
+    "global": {
+        "parseVersion": "1.2.3"
     }
 }

@@ -19,6 +19,6 @@ public final class HotActivity extends UserActivity {
     }
 
     protected String sortKey() {
-        return "score";
+        return "score2";
     }
 }

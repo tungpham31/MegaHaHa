@@ -3,16 +3,20 @@ package com.awwstream.android;
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.parse.FindCallback;
+import com.parse.FunctionCallback;
+import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -113,8 +117,8 @@ public abstract class UserActivity extends YouTubeActivity {
     public void onVideoEnded() {
         next();
     }
-    
-    protected void updateNumberOfViews(ParseObject currentVideo){
+
+    protected void updateNumberOfViews(ParseObject currentVideo) {
         currentVideo.increment("view", Integer.valueOf(1));
         currentVideo.saveInBackground();
     }
@@ -142,6 +146,7 @@ public abstract class UserActivity extends YouTubeActivity {
         if (mCurrentVideoNumber < mVideos.size() - 1) {
             markVideoAsWatched(mCurrentVideoId);
             updateNumberOfViews(mVideos.get(mCurrentVideoNumber));
+            updateScore(mVideos.get(mCurrentVideoNumber));
 
             mCurrentVideoNumber++;
             mCurrentVideoId = mVideos.get(mCurrentVideoNumber).getString("videoId");
@@ -154,6 +159,22 @@ public abstract class UserActivity extends YouTubeActivity {
             return true;
         } else {
             return false;
+        }
+    }
+
+    protected void updateScore(ParseObject video) {
+        if (video != null) {
+            int score = video.getInt("score");
+            int like = video.getInt("like");
+            int view = video.getInt("view");
+            double score2 = 0;
+            if (score > 0) {
+                score2 = score * 1000 * (like + 1) * 1.0 / (view + 1);
+            } else
+                score2 = score * 1000 * (view + 1) * 1.0 / (like + 1);
+
+            video.put("score2", new Double(score2));
+            video.saveInBackground();
         }
     }
 
