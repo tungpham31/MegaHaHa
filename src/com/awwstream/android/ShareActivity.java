@@ -40,9 +40,27 @@ public final class ShareActivity extends Activity {
         Utils.promoteVideo(videoId, title);
 
         Toast.makeText(this, R.string.share_message, Toast.LENGTH_SHORT).show();
+
         FlurryAgent.logEvent("Promote");
+        EasyTracker.getInstance().setContext(this);
         EasyTracker.getTracker().sendEvent("UI", "Click", "Promote", null);
 
         finish();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        FlurryAgent.onStartSession(this, "4QVGFH2RQW3ZM5X4W2C3");
+        EasyTracker.getInstance().activityStart(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        FlurryAgent.onEndSession(this);
+        EasyTracker.getInstance().activityStop(this);
     }
 }
