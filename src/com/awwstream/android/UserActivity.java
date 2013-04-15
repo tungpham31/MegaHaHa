@@ -160,7 +160,7 @@ public abstract class UserActivity extends YouTubeActivity {
 
     protected void updateScore(ParseObject video) {
         if (video != null) {
-            int score = video.getInt("score");
+            double score = video.getDouble("score");
             int like = video.getInt("like");
             int view = video.getInt("view");
             double score2 = 0;
