@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,7 +39,6 @@ import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.jirbo.adcolony.AdColony;
-import com.jirbo.adcolony.AdColonyVideoAd;
 import com.jirbo.adcolony.AdColonyVideoListener;
 import com.parse.ParseObject;
 
@@ -286,7 +286,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
 
                     // Show AdColony.
-                //    new AdColonyVideoAd().show(this);
+                    // new AdColonyVideoAd().show(this);
                 }
                 return true;
 
@@ -300,6 +300,17 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                     mPref.edit().putBoolean("allowFacebookConnection", true).commit();
                     getFacebookPermission();
                 }
+
+                return true;
+
+            case R.id.menu_feedback:
+                Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+                emailIntent.setType("message/rfc822");
+                emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,
+                        new String[] { "haiminh87@gmail.com", "tungpham31@gmail.com" });
+                emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                        "Feedback About AwwStream App");
+                startActivity(Intent.createChooser(emailIntent, "Email To Developers"));
 
                 return true;
 
