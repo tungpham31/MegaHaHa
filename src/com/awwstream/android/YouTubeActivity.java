@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,6 +18,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.actionbarsherlock.widget.ShareActionProvider;
 import com.actionbarsherlock.widget.ShareActionProvider.OnShareTargetSelectedListener;
+import com.appflood.AppFlood;
 import com.facebook.FacebookRequestError;
 import com.facebook.HttpMethod;
 import com.facebook.Request;
@@ -38,8 +38,6 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
-import com.jirbo.adcolony.AdColony;
-import com.jirbo.adcolony.AdColonyVideoListener;
 import com.parse.ParseObject;
 
 import net.simonvt.menudrawer.MenuDrawer;
@@ -51,8 +49,7 @@ import java.util.Arrays;
  * The base {@link Activity}.
  */
 public abstract class YouTubeActivity extends SherlockFragmentActivity implements
-        OnInitializedListener, PlaylistEventListener, PlayerStateChangeListener,
-        AdColonyVideoListener {
+        OnInitializedListener, PlaylistEventListener, PlayerStateChangeListener {
     private static final int RECOVERY_DIALOG_REQUEST = 0;
 
     /**
@@ -179,8 +176,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             mPref.edit().putInt("launchCount", launchCount + 1).commit();
         }
 
-        // Initialize AdColony.
-        AdColony.configure(this, "1.0", "appd343ffdf735b4066b97268", "vz58095954e44c48558d2008");
+        // Initialize AppFlood.
+        AppFlood.initialize(this, "een7eBPj5JqYnPWT", "0SlxlfxQ18L4f9624b8", AppFlood.AD_FULLSCREEN);
     }
 
     @Override
@@ -189,13 +186,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
         FlurryAgent.onStartSession(this, "4QVGFH2RQW3ZM5X4W2C3");
         EasyTracker.getInstance().activityStart(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        AdColony.resume(this);
     }
 
     @Override
@@ -285,8 +275,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                     FlurryAgent.logEvent("Next");
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
 
-                    // Show AdColony.
-                    // new AdColonyVideoAd().show(this);
+                    // Show AppFlood.
+                    AppFlood.showFullScreen(this);
                 }
                 return true;
 
@@ -352,13 +342,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        AdColony.pause();
     }
 
     @Override
@@ -544,16 +527,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         mFacebookConnectItem.setTitle(getString(R.string.fb_disconnect_button));
 
         return;
-    }
-
-    @Override
-    public void onAdColonyVideoStarted() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onAdColonyVideoFinished() {
-        // Do nothing.
     }
 
     protected abstract void updateTitle(String videoId);

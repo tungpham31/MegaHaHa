@@ -53,17 +53,25 @@
 
         <activity android:name="com.facebook.LoginActivity" />
         <activity
-            android:name="com.jirbo.adcolony.AdColonyOverlay"
-            android:configChanges="keyboardHidden|orientation"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+            android:name="com.appflood.AFPanelActivity"
+            android:configChanges="keyboardHidden" >
+        </activity>
         <activity
-            android:name="com.jirbo.adcolony.AdColonyFullscreen"
+            android:name="com.appflood.AFFullScreenActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent" >
+        </activity>
         <activity
-            android:name="com.jirbo.adcolony.AdColonyBrowser"
+            android:name="com.appflood.AFListActivity"
             android:configChanges="keyboardHidden|orientation"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent" >
+        </activity>
+
+        <service android:name="com.appflood.AFNotificationService" />
+
+        <activity android:name="com.appflood.notification.NotificationActivity" />
     </application>
 
 </manifest>
