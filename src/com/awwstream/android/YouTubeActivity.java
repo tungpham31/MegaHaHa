@@ -274,9 +274,14 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                             Toast.LENGTH_SHORT).show();
                     FlurryAgent.logEvent("Next");
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
+                    
+                    // Get and set counter for next button.
+                    int nextCounter = mPref.getInt("nextCounter", 0);
+                    nextCounter = (nextCounter + 1) % 3;
+                    mPref.edit().putInt("nextCounter", nextCounter).commit();
 
                     // Show AppFlood.
-                    AppFlood.showFullScreen(this);
+                    if (nextCounter == 0) AppFlood.showFullScreen(this);
                 }
                 return true;
 
