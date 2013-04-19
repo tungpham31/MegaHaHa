@@ -30,10 +30,10 @@ public class Utils {
                     video = new ParseObject("Video");
                     video.put("videoId", videoId);
                     video.put("title", title);
-                    video.put("score", Double.valueOf(0.001));
+                    video.put("score", Double.valueOf(1.001));
                     video.put("like", 0);
                     video.put("view", 0);
-                    video.put("score2", 1);
+                    video.put("score2", Integer.valueOf(1001));
                 } else {
                     video.increment("score", 2);
                     video.increment("like");
