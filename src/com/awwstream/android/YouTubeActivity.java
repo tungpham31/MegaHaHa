@@ -274,14 +274,15 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                             Toast.LENGTH_SHORT).show();
                     FlurryAgent.logEvent("Next");
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
-                    
+
                     // Get and set counter for next button.
                     int nextCounter = mPref.getInt("nextCounter", 0);
                     nextCounter = (nextCounter + 1) % 3;
                     mPref.edit().putInt("nextCounter", nextCounter).commit();
 
                     // Show AppFlood.
-                    if (nextCounter == 0) AppFlood.showFullScreen(this);
+                    if (nextCounter == 0)
+                        AppFlood.showFullScreen(this);
                 }
                 return true;
 
@@ -301,8 +302,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             case R.id.menu_feedback:
                 Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
                 emailIntent.setType("message/rfc822");
-                emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,
-                        new String[] { "haiminh87@gmail.com", "tungpham31@gmail.com" });
+                emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] {
+                        "beautiful.lab.app@gmail.com" });
                 emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
                         "Feedback About AwwStream App");
                 startActivity(Intent.createChooser(emailIntent, "Email To Developers"));
@@ -355,6 +356,15 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
         FlurryAgent.onEndSession(this);
         EasyTracker.getInstance().activityStop(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
+        if (mYouTubePlayer != null){
+            mYouTubePlayer.loadVideo(mCurrentVideoId, mYouTubePlayer.getCurrentTimeMillis());
+        }
     }
 
     @Override
