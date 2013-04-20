@@ -302,8 +302,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             case R.id.menu_feedback:
                 Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
                 emailIntent.setType("message/rfc822");
-                emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] {
-                        "beautiful.lab.app@gmail.com" });
+                emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL,
+                        new String[] { "beautiful.lab.app@gmail.com" });
                 emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
                         "Feedback About AwwStream App");
                 startActivity(Intent.createChooser(emailIntent, "Email To Developers"));
@@ -361,8 +361,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     @Override
     protected void onResume() {
         super.onResume();
-        
-        if (mYouTubePlayer != null){
+
+        if (mYouTubePlayer != null) {
             mYouTubePlayer.loadVideo(mCurrentVideoId, mYouTubePlayer.getCurrentTimeMillis());
         }
     }
@@ -374,6 +374,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             mYouTubePlayer.setPlayerStateChangeListener(this);
             mYouTubePlayer = null;
         }
+        AppFlood.destroy();
 
         super.onDestroy();
     }
