@@ -3,6 +3,8 @@ package com.awwstream.android;
 import android.app.Application;
 
 import com.parse.Parse;
+import com.parse.ParseInstallation;
+import com.parse.PushService;
 
 /**
  * The main {@link Application}.
@@ -20,5 +22,9 @@ public final class MainApplication extends Application {
         } else
             Parse.initialize(this, "DZQNfL3wXVfWcKQky72xejuQfBjkeZK7g1DjkMrE",
                     "AYkmrdZSvwpElIYKvNkTjnc4tzuqoKfX29NsMFEt");
+        
+        // Set up push notification.
+        PushService.setDefaultPushCallback(this, HotActivity.class);
+        ParseInstallation.getCurrentInstallation().saveInBackground();
     }
 }

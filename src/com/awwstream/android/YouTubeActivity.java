@@ -180,10 +180,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
         // Initialize AppFlood.
         AppFlood.initialize(this, "een7eBPj5JqYnPWT", "0SlxlfxQ18L4f9624b8", AppFlood.AD_FULLSCREEN);
-
-        // Set up push notification.
-        PushService.setDefaultPushCallback(this, UserActivity.class);
-        ParseInstallation.getCurrentInstallation().saveInBackground();
     }
 
     @Override
