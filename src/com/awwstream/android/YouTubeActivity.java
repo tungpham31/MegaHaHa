@@ -38,7 +38,9 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.PushService;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
@@ -178,6 +180,10 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
 
         // Initialize AppFlood.
         AppFlood.initialize(this, "een7eBPj5JqYnPWT", "0SlxlfxQ18L4f9624b8", AppFlood.AD_FULLSCREEN);
+
+        // Set up push notification.
+        PushService.setDefaultPushCallback(this, UserActivity.class);
+        ParseInstallation.getCurrentInstallation().saveInBackground();
     }
 
     @Override
