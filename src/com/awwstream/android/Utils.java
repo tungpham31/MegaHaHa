@@ -38,6 +38,7 @@ public class Utils {
                     video.put("title", title);
                     video.put("score", Double.valueOf(1.001));
                     video.put("like", 0);
+                    video.put("dislike", 0);
                     video.put("view", 0);
                     video.put("score2", Integer.valueOf(1001));
                 } else {
@@ -63,6 +64,7 @@ public class Utils {
             @Override
             public void done(ParseObject video, ParseException e) {
                 if (video != null) {
+                    video.increment("dislike", 1);
                     video.increment("score", -1);
                 }
                 video.saveInBackground();
