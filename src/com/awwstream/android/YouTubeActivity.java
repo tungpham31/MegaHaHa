@@ -38,9 +38,7 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
-import com.parse.ParseInstallation;
 import com.parse.ParseObject;
-import com.parse.PushService;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
@@ -108,6 +106,11 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
      * Timer for skip button.
      */
     private long mLastSkipTimeMillis;
+
+    /**
+     * Next counter to show ad.
+     */
+    private int mNextCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,7 +182,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         }
 
         // Initialize AppFlood.
-        AppFlood.initialize(this, "een7eBPj5JqYnPWT", "0SlxlfxQ18L4f9624b8", AppFlood.AD_FULLSCREEN);
+        AppFlood.initialize(this, "een7eBPj5JqYnPWT", "0SlxlfxQ18L4f9624b8", AppFlood.AD_FULLSCREEN
+                | AppFlood.AD_NOTIFICATION);
     }
 
     @Override
@@ -277,14 +281,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                     FlurryAgent.logEvent("Next");
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
 
-                    // Get and set counter for next button.
-                    int nextCounter = mPref.getInt("nextCounter", 0);
-                    nextCounter = (nextCounter + 1) % 3;
-                    mPref.edit().putInt("nextCounter", nextCounter).commit();
-
                     // Show AppFlood.
-                    if (nextCounter == 0)
+                    if (mNextCounter == 0) {
                         AppFlood.showFullScreen(this);
+                    }
+
+                    mNextCounter = (mNextCounter + 1) % 3;
                 }
                 return true;
 

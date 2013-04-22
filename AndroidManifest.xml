@@ -48,6 +48,10 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="UpdateActivity"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoDisplay" />
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -56,20 +60,17 @@
         <activity android:name="com.facebook.LoginActivity" />
         <activity
             android:name="com.appflood.AFPanelActivity"
-            android:configChanges="keyboardHidden" >
-        </activity>
+            android:configChanges="keyboardHidden" />
         <activity
             android:name="com.appflood.AFFullScreenActivity"
             android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
-            android:theme="@android:style/Theme.Translucent" >
-        </activity>
+            android:theme="@android:style/Theme.Translucent" />
         <activity
             android:name="com.appflood.AFListActivity"
             android:configChanges="keyboardHidden|orientation"
             android:launchMode="singleTask"
-            android:theme="@android:style/Theme.Translucent" >
-        </activity>
+            android:theme="@android:style/Theme.Translucent" />
 
         <service android:name="com.appflood.AFNotificationService" />
 

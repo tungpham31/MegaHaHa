@@ -19,11 +19,15 @@ public final class MainApplication extends Application {
         if (IS_PRODUCTION) {
             Parse.initialize(this, "nO6zS3yH8Z0N2PmVBeMzjqyqeQBt7vUzckNcxPHH",
                     "wjiAT5l9fqKuMLmSygPWvBjnViNGIpmzZb4PexXn");
-        } else
+        } else {
             Parse.initialize(this, "DZQNfL3wXVfWcKQky72xejuQfBjkeZK7g1DjkMrE",
                     "AYkmrdZSvwpElIYKvNkTjnc4tzuqoKfX29NsMFEt");
-        
+        }
+
         // Set up push notification.
+        PushService.subscribe(this, "Hot", HotActivity.class);
+        PushService.subscribe(this, "New", NewActivity.class);
+        PushService.subscribe(this, "Update", UpdateActivity.class);
         PushService.setDefaultPushCallback(this, HotActivity.class);
         ParseInstallation.getCurrentInstallation().saveInBackground();
     }
