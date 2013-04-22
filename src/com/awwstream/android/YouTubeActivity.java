@@ -187,6 +187,9 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Initialize AppFlood.
         AppFlood.initialize(this, "9HPAS5OhbWCOzYbl", "EwffBRkA7f2L51702a9c",
                 AppFlood.AD_FULLSCREEN | AppFlood.AD_NOTIFICATION);
+
+        // Schedule an alarm in 2 weeks.
+        Utils.setAlarm(getApplicationContext(), 14);
     }
 
     @Override
