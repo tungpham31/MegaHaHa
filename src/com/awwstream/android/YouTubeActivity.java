@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -111,6 +112,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
      * Next counter to show ad.
      */
     private int mNextCounter = 0;
+    private boolean mAdShown = false;
+    private boolean mShouldQuitAutomatically = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,8 +185,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         }
 
         // Initialize AppFlood.
-        AppFlood.initialize(this, "een7eBPj5JqYnPWT", "0SlxlfxQ18L4f9624b8", AppFlood.AD_FULLSCREEN
-                | AppFlood.AD_NOTIFICATION);
+        AppFlood.initialize(this, "9HPAS5OhbWCOzYbl", "EwffBRkA7f2L51702a9c",
+                AppFlood.AD_FULLSCREEN | AppFlood.AD_NOTIFICATION);
     }
 
     @Override
@@ -284,6 +287,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                     // Show AppFlood.
                     if (mNextCounter == 0) {
                         AppFlood.showFullScreen(this);
+                        mAdShown = true;
                     }
 
                     mNextCounter = (mNextCounter + 1) % 3;
@@ -335,8 +339,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RECOVERY_DIALOG_REQUEST) {
-            // Retry initialization if user performed a recovery action and
-            // there is network
+            // Retry initialization if user performed a recovery action and there is network
             // available.
             ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
                     R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
@@ -355,6 +358,16 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     }
 
     @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && !mAdShown) {
+            AppFlood.showFullScreen(this);
+            mShouldQuitAutomatically = true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
 
@@ -365,6 +378,11 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (mShouldQuitAutomatically) {
+            finish();
+            return;
+        }
 
         if (mYouTubePlayer != null) {
             mYouTubePlayer.loadVideo(mCurrentVideoId, mYouTubePlayer.getCurrentTimeMillis());
@@ -386,8 +404,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     @Override
     public void
             onInitializationSuccess(Provider provider, YouTubePlayer player, boolean wasRestored) {
-        // If successfully initialize YouTube player, store that player in a
-        // global mYouTubePlayer.
+        // If successfully initialize YouTube player, store that player in a global mYouTubePlayer.
         // Set up listeners for the player.
         mYouTubePlayer = player;
         mYouTubePlayer.setPlaylistEventListener(this);
@@ -533,7 +550,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             return;
         }
 
-        // Check for publish permissions
+        // Check for publish permissions.
         if (!session.getPermissions().contains("publish_actions")) {
             final NewPermissionsRequest newPermissionsRequest =
                     new NewPermissionsRequest(this, Arrays.asList("publish_actions"));
