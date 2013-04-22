@@ -9,7 +9,6 @@ import android.os.Bundle;
  * An UI-less {@link Activity} to update app.
  */
 public final class UpdateActivity extends Activity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
