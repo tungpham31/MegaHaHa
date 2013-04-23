@@ -225,7 +225,7 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             @Override
             public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
                 FlurryAgent.logEvent("Share");
-
+                EasyTracker.getTracker().sendEvent("UI", "Click", "Share", null);
                 return false;
             }
         });
