@@ -1,18 +1,10 @@
 package com.awwstream.android;
 
-import android.app.AlertDialog;
 import android.app.Application;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.net.Uri;
 
 import com.parse.Parse;
-import com.parse.ParseException;
 import com.parse.ParseInstallation;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.PushService;
 
 /**

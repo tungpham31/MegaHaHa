@@ -1,11 +1,5 @@
 package com.awwstream.android;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.os.SystemClock;
-
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -70,18 +64,5 @@ public class Utils {
                 video.saveInBackground();
             }
         });
-    }
-
-    /**
-     * Sets an alarm to go off in a few days.
-     */
-    public static void setAlarm(Context context, int days) {
-        final Intent intent = new Intent("com.awwstream.android.ALARM");
-        final PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
-
-        final AlarmManager alarmManager =
-                (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime()
-                + AlarmManager.INTERVAL_DAY * days, pendingIntent);
     }
 }

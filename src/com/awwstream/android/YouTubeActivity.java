@@ -32,6 +32,7 @@ import com.facebook.Session.NewPermissionsRequest;
 import com.facebook.Session.StatusCallback;
 import com.facebook.SessionState;
 import com.flurry.android.FlurryAgent;
+import com.gmkHIOB.EgbBsMV144999.Airpush;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
@@ -116,12 +117,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     /**
      * Instance to manage RevMob ad.
      */
-    private RevMob revmob;
+    private RevMob mRevMob;
 
     /**
-     * Instance of RevMob fullscreen ad.
+     * Instance of RevMob full screen ad.
      */
-    private RevMobFullscreen fullScreenAd;
+    private RevMobFullscreen mFullScreenAd;
 
     private boolean mAdShown = false;
     private boolean mShouldQuitAutomatically = false;
@@ -197,12 +198,13 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             mPref.edit().putInt("launchCount", launchCount + 1).commit();
         }
 
-        // Schedule an alarm in 2 weeks.
-        Utils.setAlarm(getApplicationContext(), 14);
-
         // Start RevMob and preload fullscreen ad.
-        revmob = RevMob.start(this, "51886e8589c9d9a60200009b");
-        fullScreenAd = revmob.createFullscreen(this, null);
+        mRevMob = RevMob.start(this, "51886e8589c9d9a60200009b");
+        mFullScreenAd = mRevMob.createFullscreen(this, null);
+
+        // Start Airpush.
+        final Airpush airpush = new Airpush(getApplicationContext());
+        airpush.startPushNotification(false);
     }
 
     @Override
@@ -398,8 +400,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && !mAdShown) {
-            fullScreenAd.show();
-            fullScreenAd = revmob.createFullscreen(this, null);
+            mFullScreenAd.show();
+            mFullScreenAd = mRevMob.createFullscreen(this, null);
             mShouldQuitAutomatically = true;
         }
 
