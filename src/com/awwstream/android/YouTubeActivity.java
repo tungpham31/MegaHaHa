@@ -3,11 +3,9 @@ package com.awwstream.android;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,7 +41,6 @@ import com.google.android.youtube.player.YouTubePlayer.PlayerStateChangeListener
 import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
-import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.revmob.RevMob;
@@ -335,44 +332,32 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     }
 
     protected void checkAndUpdateApp() {
-        // Check and update the newest version of app
+        // Check and update the newest version of app.
         try {
             final int versionCode =
                     getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-            final ParseQuery query = new ParseQuery("Newest_Version_Code");
-            ParseObject newestVersionCode = null;
-            try {
-                newestVersionCode = query.find().get(0);
-            } catch (ParseException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            final ParseObject newestVersionCode = new ParseQuery("Newest_Version_Code").getFirst();
+
             if (newestVersionCode.getInt("value") < versionCode) {
                 newestVersionCode.put("value", versionCode);
                 newestVersionCode.saveInBackground();
             }
+
             if (newestVersionCode.getInt("value") > versionCode) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage(getString(R.string.update_app_messasge))
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // Redirect user to app store.
                                 final Intent intent = new Intent(Intent.ACTION_VIEW);
                                 intent.setData(Uri.parse(getString(R.string.app_store_url)));
                                 startActivity(intent);
                             }
-                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User cancelled the dialog
-                            }
-                        });
-                // Create the AlertDialog object
-                Dialog dialog = builder.create();
-                dialog.show();
+                        }).setNegativeButton(R.string.no, null);
+                builder.show();
             }
-        } catch (NameNotFoundException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (Exception e) {
+            // Do nothing.
         }
     }
 
