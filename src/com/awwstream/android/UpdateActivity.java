@@ -14,7 +14,7 @@ public final class UpdateActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         final Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse("market://details?id=com.awwstream.android"));
+        intent.setData(Uri.parse(getString(R.string.app_store_url)));
         startActivity(intent);
 
         finish();

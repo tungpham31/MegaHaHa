@@ -1,12 +1,19 @@
 package com.awwstream.android;
 
+import android.app.AlertDialog;
 import android.app.Application;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
 
 import com.parse.Parse;
+import com.parse.ParseException;
 import com.parse.ParseInstallation;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.PushService;
-import com.revmob.RevMob;
 
 /**
  * The main {@link Application}.
@@ -30,8 +37,7 @@ public final class MainApplication extends Application {
         PushService.subscribe(this, "Hot", HotActivity.class);
         PushService.subscribe(this, "New", NewActivity.class);
         try {
-            final int versionCode =
-                    getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+            final int versionCode = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
             PushService.subscribe(this, "Update-" + versionCode, UpdateActivity.class);
         } catch (NameNotFoundException e) {
             // Do nothing.

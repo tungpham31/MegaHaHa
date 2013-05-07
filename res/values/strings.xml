@@ -26,4 +26,6 @@
 	<string name="connect_fb_button_message">You are connected to Facebook</string>
 	<string name="disconnect_fb_button_message">You are disconnected from Facebook</string>
 	<string name="feedback_button">Feedback</string>
+	<string name="update_app_messasge">Your version of AwwStream is not up-to-date. Do you want to update it?</string>
+	<string name="app_store_url">market://details?id=com.awwstream.android</string>
 </resources>
