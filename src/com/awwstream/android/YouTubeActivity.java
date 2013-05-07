@@ -19,7 +19,6 @@ import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.actionbarsherlock.widget.ShareActionProvider;
 import com.actionbarsherlock.widget.ShareActionProvider.OnShareTargetSelectedListener;
-import com.appflood.AppFlood;
 import com.facebook.FacebookRequestError;
 import com.facebook.HttpMethod;
 import com.facebook.Request;
@@ -40,6 +39,8 @@ import com.google.android.youtube.player.YouTubePlayer.PlaylistEventListener;
 import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.parse.ParseObject;
+import com.revmob.RevMob;
+import com.revmob.ads.fullscreen.RevMobFullscreen;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
@@ -109,9 +110,15 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     private long mLastSkipTimeMillis;
 
     /**
-     * Next counter to show ad.
+     * Instance to manage RevMob ad.
      */
-    private int mNextCounter = 0;
+    private RevMob revmob;
+
+    /**
+     * Instance of RevMob fullscreen ad.
+     */
+    private RevMobFullscreen fullScreenAd;
+
     private boolean mAdShown = false;
     private boolean mShouldQuitAutomatically = false;
 
@@ -184,12 +191,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             mPref.edit().putInt("launchCount", launchCount + 1).commit();
         }
 
-        // Initialize AppFlood.
-        AppFlood.initialize(this, "9HPAS5OhbWCOzYbl", "EwffBRkA7f2L51702a9c",
-                AppFlood.AD_FULLSCREEN | AppFlood.AD_NOTIFICATION);
-
         // Schedule an alarm in 2 weeks.
         Utils.setAlarm(getApplicationContext(), 14);
+
+        // Start RevMob and preload fullscreen ad.
+        revmob = RevMob.start(this, "51886e8589c9d9a60200009b");
+        fullScreenAd = revmob.createFullscreen(this, null);
     }
 
     @Override
@@ -286,14 +293,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
                             Toast.LENGTH_SHORT).show();
                     FlurryAgent.logEvent("Next");
                     EasyTracker.getTracker().sendEvent("UI", "Click", "Next", null);
-
-                    // Show AppFlood.
-                    if (mNextCounter == 0) {
-                        AppFlood.showFullScreen(this);
-                        mAdShown = true;
-                    }
-
-                    mNextCounter = (mNextCounter + 1) % 3;
                 }
                 return true;
 
@@ -363,7 +362,8 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && !mAdShown) {
-            AppFlood.showFullScreen(this);
+            fullScreenAd.show();
+            fullScreenAd = revmob.createFullscreen(this, null);
             mShouldQuitAutomatically = true;
         }
 
@@ -399,7 +399,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             mYouTubePlayer.setPlayerStateChangeListener(this);
             mYouTubePlayer = null;
         }
-        AppFlood.destroy();
 
         super.onDestroy();
     }

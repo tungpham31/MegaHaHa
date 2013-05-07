@@ -6,6 +6,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import com.parse.Parse;
 import com.parse.ParseInstallation;
 import com.parse.PushService;
+import com.revmob.RevMob;
 
 /**
  * The main {@link Application}.
