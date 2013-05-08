@@ -131,6 +131,9 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Get {@link SharedPreferences}.
+        mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+
         checkAndUpdateApp();
 
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -188,9 +191,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Initialize {@link YouTubePlayerSupportFragment}.
         ((YouTubePlayerSupportFragment) getSupportFragmentManager().findFragmentById(
                 R.id.youtube_fragment)).initialize(DeveloperKey.DEVELOPER_KEY, this);
-
-        // Get {@link SharedPreferences}.
-        mPref = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
 
         final int launchCount = mPref.getInt("launchCount", 0);
         if (!getIntent().getBooleanExtra("internal", false) && launchCount < 3) {
@@ -334,7 +334,12 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     }
 
     protected void checkAndUpdateApp() {
+        // Only check and update app if it is not checked in the last hour.
+        if (System.currentTimeMillis() - mPref.getLong("lastTimeCheckUpdate", 0) < 60 * 60 * 1000)
+            return;
+
         // Check and update the newest version of app.
+        mPref.edit().putLong("lastTimeCheckUpdate", System.currentTimeMillis()).commit();
         try {
             final int versionCode =
                     getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
