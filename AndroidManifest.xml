@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.awwstream.android"
-    android:versionCode="15"
-    android:versionName="3.1.0" >
+    android:versionCode="16"
+    android:versionName="3.1.1" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -72,33 +72,6 @@
         <activity
             android:name="com.revmob.ads.fullscreen.FullscreenActivity"
             android:configChanges="keyboardHidden|orientation" />
-
-        <meta-data
-            android:name="com.gmkHIOB.EgbBsMV144999.APPID"
-            android:value="1366302569144999770>" />
-        <meta-data
-            android:name="com.gmkHIOB.EgbBsMV144999.APIKEY"
-            android:value="EgbBsMV144999*1366302569144999770" />
-
-        <activity
-            android:name="com.gmkHIOB.EgbBsMV144999.OptinActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:exported="false"
-            android:theme="@android:style/Theme.Translucent" />
-
-        <service
-            android:name="com.gmkHIOB.EgbBsMV144999.PushService"
-            android:exported="false" />
-
-        <receiver
-            android:name="com.gmkHIOB.EgbBsMV144999.BootReceiver"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-
-                <category android:name="android.intent.category.HOME" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

@@ -32,7 +32,6 @@ import com.facebook.Session.NewPermissionsRequest;
 import com.facebook.Session.StatusCallback;
 import com.facebook.SessionState;
 import com.flurry.android.FlurryAgent;
-import com.gmkHIOB.EgbBsMV144999.Airpush;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
@@ -201,10 +200,6 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         // Start RevMob and preload fullscreen ad.
         mRevMob = RevMob.start(this, "51886e8589c9d9a60200009b");
         mFullScreenAd = mRevMob.createFullscreen(this, null);
-
-        // Start Airpush.
-        final Airpush airpush = new Airpush(getApplicationContext());
-        airpush.startPushNotification(false);
     }
 
     @Override
