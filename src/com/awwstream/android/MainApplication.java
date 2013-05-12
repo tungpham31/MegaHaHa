@@ -28,6 +28,7 @@ public final class MainApplication extends Application {
         // Set up push notification.
         PushService.subscribe(this, "Hot", HotActivity.class);
         PushService.subscribe(this, "New", NewActivity.class);
+        PushService.subscribe(this, "Install", InstallActivity.class);
         try {
             final int versionCode = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
             PushService.subscribe(this, "Update-" + versionCode, UpdateActivity.class);
