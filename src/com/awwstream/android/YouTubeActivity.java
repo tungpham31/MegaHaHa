@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -43,8 +42,8 @@ import com.google.android.youtube.player.YouTubePlayer.Provider;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.revmob.RevMob;
-import com.revmob.ads.fullscreen.RevMobFullscreen;
+import com.startapp.android.publish.HtmlAd;
+import com.startapp.android.publish.model.AdPreferences;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.MenuDrawer.OnDrawerStateChangeListener;
@@ -114,16 +113,10 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
     private long mLastSkipTimeMillis;
 
     /**
-     * Instance to manage RevMob ad.
+     * Ad.
      */
-    private RevMob mRevMob;
+    private HtmlAd mHtmlAd;
 
-    /**
-     * Instance of RevMob full screen ad.
-     */
-    private RevMobFullscreen mFullScreenAd;
-
-    private boolean mAdShown = false;
     private boolean mShouldQuitAutomatically = false;
 
     @Override
@@ -197,9 +190,11 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
             mPref.edit().putInt("launchCount", launchCount + 1).commit();
         }
 
-        // Start RevMob and preload fullscreen ad.
-        mRevMob = RevMob.start(this, "51886e8589c9d9a60200009b");
-        mFullScreenAd = mRevMob.createFullscreen(this, null);
+        // Initialize ad.
+        final AdPreferences adPreferences =
+                new AdPreferences("105253107", "205145544", AdPreferences.TYPE_INAPP_EXIT);
+        mHtmlAd = new HtmlAd(this);
+        mHtmlAd.load(adPreferences, null);
     }
 
     @Override
@@ -393,19 +388,13 @@ public abstract class YouTubeActivity extends SherlockFragmentActivity implement
         if (mMenuDrawer.isMenuVisible()) {
             mMenuDrawer.closeMenu();
         } else {
+            if (mHtmlAd != null) {
+                mShouldQuitAutomatically = true;
+                mHtmlAd.show();
+            }
+
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && !mAdShown) {
-            mFullScreenAd.show();
-            mFullScreenAd = mRevMob.createFullscreen(this, null);
-            mShouldQuitAutomatically = true;
-        }
-
-        return super.onKeyDown(keyCode, event);
     }
 
     @Override
