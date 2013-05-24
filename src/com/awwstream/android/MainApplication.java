@@ -1,7 +1,6 @@
 package com.awwstream.android;
 
 import android.app.Application;
-import android.content.pm.PackageManager.NameNotFoundException;
 
 import com.parse.Parse;
 import com.parse.ParseInstallation;
@@ -29,12 +28,7 @@ public final class MainApplication extends Application {
         PushService.subscribe(this, "Hot", HotActivity.class);
         PushService.subscribe(this, "New", NewActivity.class);
         PushService.subscribe(this, "Install", InstallActivity.class);
-        try {
-            final int versionCode = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-            PushService.subscribe(this, "Update-" + versionCode, UpdateActivity.class);
-        } catch (NameNotFoundException e) {
-            // Do nothing.
-        }
+        PushService.subscribe(this, "Update", UpdateActivity.class);
         PushService.setDefaultPushCallback(this, HotActivity.class);
         ParseInstallation.getCurrentInstallation().saveInBackground();
     }
